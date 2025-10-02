@@ -1,0 +1,240 @@
+/* public/assets/css/reports_paid.css */
+
+/* Importa la fuente Inter de Google Fonts para un look moderno */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Paleta de colores (duplicada para ser autosuficiente en cada CSS de página) */
+    --primary-blue: #007bff;
+    --dark-blue: #0056b3;
+    --light-blue: #e0f2ff;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --text-color: #343a40;
+    --border-color: #ced4da;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+body {`n    display: flex;`n    flex-direction: column;`n    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Estilos para el contenedor principal de la página */
+.container {
+    max-width: 1200px;`n}`n`nmain {`n    flex: 1;`n}
+}
+
+/* Navbar personalizada (duplicado para esta página) */
+.navbar {
+    background: linear-gradient(90deg, var(--primary-blue), var(--dark-blue)) !important;
+    box-shadow: 0 2px 10px var(--shadow-medium);
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+    color: var(--white) !important;
+    font-weight: 500;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--light-blue) !important;
+    transform: translateY(-2px);
+}
+
+.dropdown-menu {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-medium);
+    border: none;
+}
+
+.dropdown-item {
+    color: var(--text-color);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+}
+
+/* --- REGLAS CSS PARA EL MENÚ DESPLEGABLE CON HOVER (si se usa) --- */
+/* Solo aplica en pantallas grandes para evitar problemas en móviles */
+@media (min-width: 992px) { /* Bootstrap's 'lg' breakpoint */
+    .navbar .dropdown:hover .dropdown-menu {
+        display: block; /* Muestra el menú al pasar el ratón por el padre .dropdown */
+        margin-top: 0; /* Elimina el margen superior predeterminado de Bootstrap si lo hay */
+    }
+}
+/* --- FIN REGLAS CSS PARA EL MENÚ DESPLEGABLE CON HOVER --- */
+
+
+/* Estilos de botones generales */
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px var(--shadow-light);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px var(--shadow-light);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px var(--shadow-light);
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+/* Estilos de formularios */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    padding: 10px 15px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+/* Estilos de tarjetas (cards) */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 6px 20px var(--shadow-light);
+    border: none;
+}
+
+.card-header {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    font-weight: 600;
+    padding: 15px 20px;
+    border-bottom: none;
+}
+
+/* Estilos específicos de la tabla */
+.table {
+    border-radius: 8px;
+    overflow: hidden; /* Asegura que el borde redondeado se vea en la tabla */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    background-color: var(--white);
+}
+
+.table thead {
+    background-color: var(--primary-blue);
+    color: var(--white);
+}
+
+.table th {
+    padding: 15px;
+    font-weight: 600;
+    border-bottom: none; /* Eliminar borde inferior del thead */
+}
+
+.table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: var(--light-gray); /* Raya para mejor legibilidad */
+}
+
+.table tbody tr:hover {
+    background-color: var(--light-blue); /* Resaltar fila al pasar el ratón */
+}
+
+.table td {
+    padding: 12px 15px;
+    vertical-align: middle; /* Alineación vertical para el contenido de la celda */
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para los resúmenes de reportes */
+.report-summary {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.report-summary h4 {
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.report-summary .row {
+    margin-bottom: 10px;
+}
+
+.report-summary .col-md-6 strong {
+    color: var(--text-color);
+}
+
+.report-summary .col-md-6 span {
+    font-weight: 500;
+    color: var(--dark-blue);
+}
+
+/* Animaciones de página */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-content {
+    animation: fadeIn 0.8s ease-out forwards;
+    padding-top: 20px;
+}
+
+/* Footer (duplicado para esta página) */
+footer {
+    background-color: var(--dark-blue) !important;
+    color: var(--white) !important;
+    padding: 20px 0;
+    box-shadow: 0 -2px 10px var(--shadow-light);`n    margin-top: auto;`n}
+}
+

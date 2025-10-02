@@ -1,0 +1,139 @@
+/* public/assets/css/login.css */
+
+/* Importa la fuente Inter de Google Fonts para un look moderno */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Paleta de colores (replicada para ser autosuficiente) */
+    --primary-blue: #007bff;
+    --dark-blue: #0056b3;
+    --light-blue: #e0f2ff;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --text-color: #343a40;
+    --border-color: #ced4da;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+/* Animación de fondo de gradiente */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body {
+    font-family: 'Inter', sans-serif; /* Fuente aplicada al body */
+    background: linear-gradient(-45deg, #e0f2ff, #bbdefb, #90CAF9, #64b5f6);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    overflow: hidden; /* Evitar barras de desplazamiento si el gradiente es muy grande */
+    color: var(--text-color); /* Color de texto global para el body */
+}
+
+.login-container {
+    max-width: 450px;
+    width: 90%;
+    padding: 40px;
+    border-radius: 15px;
+    background-color: var(--white);
+    box-shadow: 0 10px 30px var(--shadow-medium);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInScale 0.8s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: translateY(50px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-header {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: var(--primary-blue);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 12px 18px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25), 0 2px 8px rgba(0, 123, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: linear-gradient(45deg, var(--primary-blue), var(--dark-blue));
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, var(--dark-blue), var(--primary-blue));
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2) inset;
+}
+
+.alert {
+    border-radius: 8px;
+    font-size: 0.95rem;
+    padding: 15px 20px;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividad básica */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 25px;
+        border-radius: 10px;
+    }
+    .login-header {
+        font-size: 1.8rem;
+    }
+    .form-control, .btn-primary {
+        font-size: 0.95rem;
+        padding: 10px 15px;
+    }
+    .col-form-label {
+        text-align: left !important;
+    }
+}
+
