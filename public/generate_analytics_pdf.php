@@ -141,6 +141,12 @@ $pdf->SetFont('helvetica', '', 10);
 // Añadir página
 $pdf->AddPage();
 
+// Logo en la parte superior izquierda
+$logo_path = __DIR__ . '/assets/img/logo.png';
+if (file_exists($logo_path)) {
+    $pdf->Image($logo_path, 15, 10, 30, 15, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+}
+
 // Título
 $pdf->SetFont('helvetica', 'B', 16);
 $pdf->Cell(0, 10, 'Reporte Analítico de Nómina - VALFOR S.A.', 0, 1, 'C');
