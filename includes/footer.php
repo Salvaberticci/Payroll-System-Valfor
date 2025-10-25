@@ -3,8 +3,8 @@
 ?>
     </main> <!-- Cierre de la etiqueta <main> -->
     <footer class="py-3">
-        <div class="container">
-            <p>&copy; <?php echo date('Y'); ?> Sistema de Nómina. Todos los derechos reservados.</p>
+        <div class="container text-center">
+            <p class="mb-0">&copy; <?php echo date('Y'); ?> Sistema de Nómina VALFOR S.A. Todos los derechos reservados.</p>
         </div>
     </footer>
 

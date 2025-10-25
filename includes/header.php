@@ -42,6 +42,14 @@
                     <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Manual de Usuario</a>
+                    </li>
+                    <li class="nav-item">
+                        <div style="background-color: white; height: 20px; width: 80px; display: flex; align-items: center; justify-content: center; margin-left: 10px; margin-top: 10px;">
+                            <img src="<?php echo getBaseUrl(); ?>assets/img/logo.png" alt="VALFOR S.A." style="height: 70px;">
+                        </div>
+                    </li>
                     <li class="nav-item dropdown">
                         <!-- Volvemos a usar data-bs-toggle, y el JS incrustado lo manejará -->
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -51,15 +59,6 @@
                             <li><a class="dropdown-item" href="<?php echo getBaseUrl(); ?>logout.php"><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Manual de Usuario</a>
-                    </li>
-                    <li class="nav-item">
-                        <div style="background-color: white; height: 20px; width: 80px; display: flex; align-items: center; justify-content: center; margin-left: 10px; margin-top: 10px;">
-                            <img src="<?php echo getBaseUrl(); ?>assets/img/logo.png" alt="VALFOR S.A." style="height: 70px;">
-                        </div>
-                    </li>
-                    
                 </ul>
             </div>
         </div>
