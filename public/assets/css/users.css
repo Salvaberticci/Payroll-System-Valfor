@@ -215,6 +215,20 @@ main {
     border-top: 1px solid #dee2e6;
 }
 
+/* Estilos específicos para los botones de acción en la tabla de usuarios */
+.table .btn {
+    width: 38px; /* Ancho fijo para todos los botones */
+    height: 38px; /* Alto fijo para todos los botones */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2px;
+}
+
+.table .btn:last-child {
+    margin-right: 0;
+}
+
 /* Animaciones de página */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
