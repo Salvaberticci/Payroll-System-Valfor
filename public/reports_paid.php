@@ -138,7 +138,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
         </div>
 
         <?php if (!empty($report_data)): ?>
-            <h2 class="mb-4">Nóminas Pagadas por Período</h2>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    Nóminas Pagadas por Período
+                    <button type="button" class="btn btn-info btn-sm" onclick="printPaidPDF()">
+                        <i class="bi bi-printer me-1"></i> Descargar PDF
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h2 class="mb-4">Detalles de Pagos</h2>
             <div class="table-responsive mb-4">
                 <table class="table table-hover table-striped">
                     <thead>
@@ -190,7 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
                     </div>
                 </div>
             </div>
-
         <?php endif; ?>
 
         <div class="mt-4 text-center">
@@ -205,6 +212,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
     <!-- Scripts personalizados (si los hay) directamente con ruta relativa -->
     <script src="./assets/js/script.js"></script>
+    <script>
+        function printPaidPDF() {
+            // Crear un formulario para enviar los parámetros actuales
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '<?php echo getBaseUrl(); ?>generate_paid_report_pdf.php';
+            form.target = '_blank';
+
+            // Agregar los parámetros del formulario actual
+            const startDate = document.getElementById('start_date_filter').value;
+            const endDate = document.getElementById('end_date_filter').value;
+
+            if (startDate) {
+                const inputStart = document.createElement('input');
+                inputStart.type = 'hidden';
+                inputStart.name = 'start_date_filter';
+                inputStart.value = startDate;
+                form.appendChild(inputStart);
+            }
+
+            if (endDate) {
+                const inputEnd = document.createElement('input');
+                inputEnd.type = 'hidden';
+                inputEnd.name = 'end_date_filter';
+                inputEnd.value = endDate;
+                form.appendChild(inputEnd);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+    </script>
 </body>
 </html>
 s

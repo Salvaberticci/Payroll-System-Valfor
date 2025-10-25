@@ -201,7 +201,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
         </div>
 
         <?php if (!empty($report_data)): ?>
-            <h2 class="mb-4">Reporte Detallado</h2>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    Reporte Detallado
+                    <button type="button" class="btn btn-info btn-sm" onclick="printEmployeePDF()">
+                        <i class="bi bi-printer me-1"></i> Descargar PDF
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h2 class="mb-4">Detalles por Período</h2>
             <?php foreach ($report_data as $period_key => $data): ?>
                 <div class="card mb-4">
                     <div class="card-header">
@@ -281,7 +289,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
                     </div>
                 </div>
             </div>
-
         <?php endif; ?>
 
         <div class="mt-4 text-center">
@@ -296,5 +303,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
     <!-- Scripts personalizados (si los hay) directamente con ruta relativa -->
     <script src="./assets/js/script.js"></script>
+    <script>
+        function printEmployeePDF() {
+            // Crear un formulario para enviar los parámetros actuales
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '<?php echo getBaseUrl(); ?>generate_employee_report_pdf.php';
+            form.target = '_blank';
+
+            // Agregar los parámetros del formulario actual
+            const employeeId = document.getElementById('employee_id').value;
+            const startDate = document.getElementById('start_date_filter').value;
+            const endDate = document.getElementById('end_date_filter').value;
+
+            if (employeeId) {
+                const inputEmployee = document.createElement('input');
+                inputEmployee.type = 'hidden';
+                inputEmployee.name = 'employee_id';
+                inputEmployee.value = employeeId;
+                form.appendChild(inputEmployee);
+            }
+
+            if (startDate) {
+                const inputStart = document.createElement('input');
+                inputStart.type = 'hidden';
+                inputStart.name = 'start_date_filter';
+                inputStart.value = startDate;
+                form.appendChild(inputStart);
+            }
+
+            if (endDate) {
+                const inputEnd = document.createElement('input');
+                inputEnd.type = 'hidden';
+                inputEnd.name = 'end_date_filter';
+                inputEnd.value = endDate;
+                form.appendChild(inputEnd);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+    </script>
 </body>
 </html>
