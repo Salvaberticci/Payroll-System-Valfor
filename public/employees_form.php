@@ -14,6 +14,7 @@ $employee = [
     'fecha_ingreso' => '',
     'cargo' => '',
     'salario_base_mensual_usd' => '',
+    'photo_path' => '',
     'is_active' => 1 // Por defecto, el empleado está activo
 ];
 $message = '';
@@ -25,7 +26,7 @@ $pdo = getDbConnection();
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $employee_id = $_GET['id'];
     try {
-        $stmt = $pdo->prepare("SELECT id, cedula, full_name, fecha_ingreso, cargo, salario_base_mensual_usd, is_active FROM employees WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT id, cedula, full_name, fecha_ingreso, cargo, salario_base_mensual_usd, photo_path, is_active FROM employees WHERE id = :id");
         $stmt->bindParam(':id', $employee_id, PDO::PARAM_INT);
         $stmt->execute();
         $fetched_employee = $stmt->fetch();
@@ -53,12 +54,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $salario_base_mensual_usd = str_replace(',', '.', trim($_POST['salario_base_mensual_usd'] ?? '')); // Reemplaza coma por punto si es necesario
     $is_active = isset($_POST['is_active']) ? 1 : 0;
 
+    // Manejo de la foto
+    $photo_path = $employee['photo_path'] ?? ''; // Mantener la foto existente por defecto
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = __DIR__ . '/uploads/employees/';
+        $file_extension = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+        if (in_array($file_extension, $allowed_extensions)) {
+            $new_filename = uniqid('employee_', true) . '.' . $file_extension;
+            $upload_path = $upload_dir . $new_filename;
+
+            if (move_uploaded_file($_FILES['photo']['tmp_name'], $upload_path)) {
+                // Eliminar foto anterior si existe
+                if (!empty($photo_path) && file_exists(__DIR__ . '/' . $photo_path)) {
+                    unlink(__DIR__ . '/' . $photo_path);
+                }
+                $photo_path = 'uploads/employees/' . $new_filename;
+            } else {
+                $message = 'Error al subir la foto.';
+                $message_type = 'danger';
+            }
+        } else {
+            $message = 'Tipo de archivo no permitido. Solo se permiten JPG, PNG y GIF.';
+            $message_type = 'danger';
+        }
+    }
+
     // Actualizar los datos del array $employee para que el formulario los retenga en caso de error
     $employee['cedula'] = $cedula;
     $employee['full_name'] = $full_name;
     $employee['fecha_ingreso'] = $fecha_ingreso;
     $employee['cargo'] = $cargo;
     $employee['salario_base_mensual_usd'] = $salario_base_mensual_usd;
+    $employee['photo_path'] = $photo_path;
     $employee['is_active'] = $is_active;
 
     // Validaciones
@@ -69,13 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             if ($employee_id) {
                 // Actualizar empleado existente
-                $stmt = $pdo->prepare("UPDATE employees SET cedula = :cedula, full_name = :full_name, fecha_ingreso = :fecha_ingreso, cargo = :cargo, salario_base_mensual_usd = :salario_base_mensual_usd, is_active = :is_active WHERE id = :id");
+                $stmt = $pdo->prepare("UPDATE employees SET cedula = :cedula, full_name = :full_name, fecha_ingreso = :fecha_ingreso, cargo = :cargo, salario_base_mensual_usd = :salario_base_mensual_usd, photo_path = :photo_path, is_active = :is_active WHERE id = :id");
                 $stmt->bindParam(':id', $employee_id, PDO::PARAM_INT);
                 $stmt->bindParam(':cedula', $cedula);
                 $stmt->bindParam(':full_name', $full_name);
                 $stmt->bindParam(':fecha_ingreso', $fecha_ingreso);
                 $stmt->bindParam(':cargo', $cargo);
                 $stmt->bindParam(':salario_base_mensual_usd', $salario_base_mensual_usd);
+                $stmt->bindParam(':photo_path', $photo_path);
                 $stmt->bindParam(':is_active', $is_active, PDO::PARAM_INT);
 
                 if ($stmt->execute()) {
@@ -87,12 +117,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 // Insertar nuevo empleado
-                $stmt = $pdo->prepare("INSERT INTO employees (cedula, full_name, fecha_ingreso, cargo, salario_base_mensual_usd, is_active) VALUES (:cedula, :full_name, :fecha_ingreso, :cargo, :salario_base_mensual_usd, :is_active)");
+                $stmt = $pdo->prepare("INSERT INTO employees (cedula, full_name, fecha_ingreso, cargo, salario_base_mensual_usd, photo_path, is_active) VALUES (:cedula, :full_name, :fecha_ingreso, :cargo, :salario_base_mensual_usd, :photo_path, :is_active)");
                 $stmt->bindParam(':cedula', $cedula);
                 $stmt->bindParam(':full_name', $full_name);
                 $stmt->bindParam(':fecha_ingreso', $fecha_ingreso);
                 $stmt->bindParam(':cargo', $cargo);
                 $stmt->bindParam(':salario_base_mensual_usd', $salario_base_mensual_usd);
+                $stmt->bindParam(':photo_path', $photo_path);
                 $stmt->bindParam(':is_active', $is_active, PDO::PARAM_INT);
 
                 if ($stmt->execute()) {
@@ -104,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Limpiar el formulario si se añadió uno nuevo
                     $employee = [
                         'id' => null, 'cedula' => '', 'full_name' => '', 'fecha_ingreso' => '',
-                        'cargo' => '', 'salario_base_mensual_usd' => '', 'is_active' => 1
+                        'cargo' => '', 'salario_base_mensual_usd' => '', 'photo_path' => '', 'is_active' => 1
                     ];
                 } else {
                     $message = 'Error al añadir el nuevo empleado.';
@@ -154,48 +185,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($employee['id']); ?>">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form method="POST" action="" enctype="multipart/form-data">
+                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($employee['id']); ?>">
 
-                    <div class="mb-3">
-                        <label for="cedula" class="form-label">Cédula</label>
-                        <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($employee['cedula']); ?>" required>
-                    </div>
+                            <div class="mb-3">
+                                <label for="cedula" class="form-label">Cédula</label>
+                                <input type="text" class="form-control form-control-sm" id="cedula" name="cedula" value="<?php echo htmlspecialchars($employee['cedula']); ?>" required style="max-width: 200px;">
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="full_name" class="form-label">Nombre Completo</label>
-                        <input type="text" class="form-control" id="full_name" name="full_name" value="<?php echo htmlspecialchars($employee['full_name']); ?>" required>
-                    </div>
+                            <div class="mb-3">
+                                <label for="full_name" class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control form-control-sm" id="full_name" name="full_name" value="<?php echo htmlspecialchars($employee['full_name']); ?>" required style="max-width: 300px;">
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
-                        <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" value="<?php echo htmlspecialchars($employee['fecha_ingreso']); ?>" required>
-                    </div>
+                            <div class="mb-3">
+                                <label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
+                                <input type="date" class="form-control form-control-sm" id="fecha_ingreso" name="fecha_ingreso" value="<?php echo htmlspecialchars($employee['fecha_ingreso']); ?>" required style="max-width: 200px;">
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="cargo" class="form-label">Cargo</label>
-                        <input type="text" class="form-control" id="cargo" name="cargo" value="<?php echo htmlspecialchars($employee['cargo']); ?>" required>
-                    </div>
+                            <div class="mb-3">
+                                <label for="cargo" class="form-label">Cargo</label>
+                                <input type="text" class="form-control form-control-sm" id="cargo" name="cargo" value="<?php echo htmlspecialchars($employee['cargo']); ?>" required style="max-width: 250px;">
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="salario_base_mensual_usd" class="form-label">Salario Base Mensual ($)</label>
-                        <input type="number" step="0.01" class="form-control" id="salario_base_mensual_usd" name="salario_base_mensual_usd" value="<?php echo htmlspecialchars($employee['salario_base_mensual_usd']); ?>" required>
-                    </div>
+                            <div class="mb-3">
+                                <label for="salario_base_mensual_usd" class="form-label">Salario Base Mensual ($)</label>
+                                <input type="number" step="0.01" class="form-control form-control-sm" id="salario_base_mensual_usd" name="salario_base_mensual_usd" value="<?php echo htmlspecialchars($employee['salario_base_mensual_usd']); ?>" required style="max-width: 200px;">
+                            </div>
 
-                    <div class="mb-4 form-check">
-                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" <?php echo ($employee['is_active'] ? 'checked' : ''); ?>>
-                        <label class="form-check-label" for="is_active">Empleado Activo</label>
-                    </div>
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Foto del Empleado</label>
+                                <input type="file" class="form-control form-control-sm" id="photo" name="photo" accept="image/*" style="max-width: 300px;">
+                                <small class="form-text text-muted">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                            </div>
 
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-save me-1"></i> <?php echo ($employee['id'] ? 'Actualizar' : 'Guardar'); ?> Empleado
-                        </button>
-                        <a href="<?php echo getBaseUrl(); ?>employees.php" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left-circle me-1"></i> Volver al Listado
-                        </a>
+                            <div class="mb-4 form-check">
+                                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" <?php echo ($employee['is_active'] ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="is_active">Empleado Activo</label>
+                            </div>
                     </div>
-                </form>
+                    <div class="col-md-4 text-center">
+                        <div class="photo-display mb-3">
+                            <?php if (!empty($employee['photo_path'])): ?>
+                                <img src="<?php echo htmlspecialchars($employee['photo_path']); ?>" alt="Foto del empleado" class="img-fluid rounded" style="max-width: 200px; max-height: 200px; border: 2px solid #ddd;">
+                            <?php else: ?>
+                                <div class="no-photo-placeholder" style="width: 200px; height: 200px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <i class="bi bi-person-circle" style="font-size: 4rem; color: #ccc;"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save me-1"></i> <?php echo ($employee['id'] ? 'Actualizar' : 'Guardar'); ?> Empleado
+                            </button>
+                            <a href="<?php echo getBaseUrl(); ?>employees.php" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left-circle me-1"></i> Volver al Listado
+                            </a>
+                        </div>
+                    </form>
             </div>
         </div>
     </div>

@@ -38,66 +38,76 @@ $page_title = 'Dashboard - Sistema de Nómina';
         <hr class="my-4">
 
         <h2 class="mb-4">Opciones Rápidas:</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-3 g-4">
+            <?php $card_count = 0; ?>
             <?php if (getUserRole() === ROLE_ADMIN || getUserRole() === ROLE_ASSISTANT): ?>
                 <div class="col">
                     <a href="<?php echo getBaseUrl(); ?>employees.php" class="card h-100 text-decoration-none dashboard-card">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center">
                             <i class="bi bi-people-fill display-4 text-primary mb-3"></i>
                             <h5 class="card-title text-primary">Gestión de Empleados</h5>
-                            <p class="card-text text-center text-muted">Añade, edita y gestiona la información de tus empleados.</p>
                         </div>
                     </a>
                 </div>
+                <?php $card_count++; ?>
                 <div class="col">
                     <a href="<?php echo getBaseUrl(); ?>payroll_calc.php" class="card h-100 text-decoration-none dashboard-card">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center">
                             <i class="bi bi-calculator-fill display-4 text-primary mb-3"></i>
                             <h5 class="card-title text-primary">Calcular Nómina</h5>
-                            <p class="card-text text-center text-muted">Realiza los cálculos quincenales de la nómina.</p>
                         </div>
                     </a>
                 </div>
+                <?php $card_count++; ?>
                 <div class="col">
                     <a href="<?php echo getBaseUrl(); ?>payroll_concepts.php" class="card h-100 text-decoration-none dashboard-card">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center">
                             <i class="bi bi-cash-stack display-4 text-primary mb-3"></i>
                             <h5 class="card-title text-primary">Conceptos de Nómina</h5>
-                            <p class="card-text text-center text-muted">Define y administra los diferentes conceptos de pago y descuento.</p>
                         </div>
                     </a>
                 </div>
+                <?php $card_count++; ?>
             <?php endif; ?>
-
-            <div class="col">
-                <a href="<?php echo getBaseUrl(); ?>reports_employee.php" class="card h-100 text-decoration-none dashboard-card">
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                        <i class="bi bi-file-earmark-bar-graph-fill display-4 text-primary mb-3"></i>
-                        <h5 class="card-title text-primary">Reportes por Empleado</h5>
-                        <p class="card-text text-center text-muted">Consulta los pagos y descuentos detallados por cada trabajador.</p>
-                    </div>
-                </a>
-            </div>
-            <div class="col">
-                <a href="<?php echo getBaseUrl(); ?>reports_analytics.php" class="card h-100 text-decoration-none dashboard-card">
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                        <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
-                        <h5 class="card-title text-primary">Reportes Estadísticos</h5>
-                        <p class="card-text text-center text-muted">Visualiza tendencias y análisis de datos de nómina.</p>
-                    </div>
-                </a>
-            </div>
             <?php if (getUserRole() === ROLE_ADMIN): ?>
                 <div class="col">
                     <a href="<?php echo getBaseUrl(); ?>users.php" class="card h-100 text-decoration-none dashboard-card">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center">
                             <i class="bi bi-person-gear display-4 text-primary mb-3"></i>
                             <h5 class="card-title text-primary">Gestión de Usuarios</h5>
-                            <p class="card-text text-center text-muted">Administra los usuarios y roles del sistema.</p>
                         </div>
                     </a>
                 </div>
+                <?php $card_count++; ?>
             <?php endif; ?>
+            <div class="col">
+                <a href="<?php echo getBaseUrl(); ?>reports_employee.php" class="card h-100 text-decoration-none dashboard-card">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-file-earmark-bar-graph-fill display-4 text-primary mb-3"></i>
+                        <h5 class="card-title text-primary">Reportes por Empleado</h5>
+                    </div>
+                </a>
+            </div>
+            <?php $card_count++; ?>
+            <div class="col">
+                <a href="<?php echo getBaseUrl(); ?>reports_analytics.php" class="card h-100 text-decoration-none dashboard-card">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
+                        <h5 class="card-title text-primary">Reportes Estadísticos</h5>
+                    </div>
+                </a>
+            </div>
+            <?php $card_count++; ?>
+            <?php
+            // Add invisible cards to fill the row and ensure uniform size
+            $remainder = $card_count % 3;
+            if ($remainder > 0) {
+                $to_add = 3 - $remainder;
+                for ($i = 0; $i < $to_add; $i++) {
+                    echo '<div class="col"><div class="card dashboard-card invisible"></div></div>';
+                }
+            }
+            ?>
         </div>
 
         <div class="mt-5 text-center">

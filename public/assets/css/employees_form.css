@@ -188,3 +188,17 @@ footer {
     color: var(--text-color);
 }
 
+/* Estilos para el área de foto */
+.photo-display {
+    position: relative;
+}
+
+.no-photo-placeholder {
+    background-color: var(--light-gray);
+}
+
+.photo-display img {
+    object-fit: cover;
+    border-radius: 8px;
+}
+
