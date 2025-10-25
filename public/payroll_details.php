@@ -223,6 +223,9 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                         </div>
                     </div>
                     <div class="mt-3 text-end">
+                        <button type="button" class="btn btn-info me-2" onclick="printPayrollDetailsPDF(<?php echo $payroll_period['id']; ?>)">
+                            <i class="bi bi-printer me-1"></i> Imprimir PDF
+                        </button>
                         <?php if ($payroll_period['status'] === 'calculated'): ?>
                             <form method="POST" action="" style="display:inline;">
                                 <input type="hidden" name="action" value="mark_as_paid">
@@ -337,5 +340,10 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
     <!-- Scripts personalizados (si los hay) directamente con ruta relativa -->
     <script src="./assets/js/script.js"></script>
+    <script>
+        function printPayrollDetailsPDF(periodId) {
+            window.open('<?php echo getBaseUrl(); ?>generate_payroll_details_pdf.php?period_id=' + periodId, '_blank');
+        }
+    </script>
 </body>
 </html>
