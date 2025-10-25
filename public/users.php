@@ -43,34 +43,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Lógica para procesar el reseteo de contraseña
-if (isset($_GET['action']) && $_GET['action'] === 'reset_password' && isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $user_id_to_reset = $_GET['id'];
-
-    try {
-        // Generar una nueva contraseña temporal (8 caracteres alfanuméricos)
-        $new_password = substr(md5(uniqid(mt_rand(), true)), 0, 8);
-        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-
-        $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
-        $stmt->bindParam(':password', $hashed_password);
-        $stmt->bindParam(':id', $user_id_to_reset, PDO::PARAM_INT);
-
-        if ($stmt->execute()) {
-            $message = 'Contraseña reseteada exitosamente. La nueva contraseña temporal es: <strong>' . htmlspecialchars($new_password) . '</strong><br>Por favor, informa al usuario de esta contraseña y recomiéndale cambiarla inmediatamente.';
-            $message_type = 'success';
-        } else {
-            $message = 'Error al resetear la contraseña.';
-            $message_type = 'danger';
-        }
-    } catch (PDOException $e) {
-        $message = 'Error de base de datos al resetear contraseña: ' . htmlspecialchars($e->getMessage());
-        $message_type = 'danger';
-    }
-    // Redirigir para limpiar los parámetros GET de la URL
-    header('Location: ' . getBaseUrl() . 'users.php?message=' . urlencode($message) . '&type=' . urlencode($message_type));
-    exit();
-}
 
 // Lógica para cargar datos si se está editando un usuario o si se va a añadir uno nuevo
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
@@ -305,9 +277,6 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                                             <a href="<?php echo getBaseUrl(); ?>users.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info text-white me-1" title="Editar">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-warning text-white me-1" title="Resetear Contraseña" onclick="showResetConfirm(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')">
-                                                <i class="bi bi-key"></i>
-                                            </button>
                                             <button type="button" class="btn btn-sm btn-danger" title="Eliminar" onclick="showDeleteConfirm(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -322,39 +291,6 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
         </div>
     </div>
 
-    <!-- Modal de Confirmación de Reseteo de Contraseña -->
-    <div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-labelledby="resetConfirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="resetConfirmModalLabel">
-                        <i class="bi bi-key-fill me-2 text-warning"></i>Confirmar Reseteo de Contraseña
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
-                    </div>
-                    <p class="text-center mb-3">
-                        ¿Estás seguro de que deseas resetear la contraseña del usuario <strong id="usernameToReset"></strong>?
-                    </p>
-                    <div class="alert alert-warning" role="alert">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Nota:</strong> Se generará una nueva contraseña temporal de 8 caracteres alfanuméricos. Deberás comunicar esta contraseña al usuario para que pueda acceder y cambiarla posteriormente.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>Cancelar
-                    </button>
-                    <a href="#" id="confirmResetButton" class="btn btn-warning">
-                        <i class="bi bi-key me-1"></i>Resetear Contraseña
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <?php include __DIR__ . '/../includes/footer.php'; // Incluir el pie de página ?>
     <!-- Incluir Bootstrap JS (Bundle con Popper) directamente con ruta relativa -->
@@ -391,14 +327,6 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
             deleteModal.show();
         }
 
-        // Función para mostrar el modal de confirmación de reseteo de contraseña
-        function showResetConfirm(userId, username) {
-            document.getElementById('usernameToReset').innerText = username;
-            const resetButton = document.getElementById('confirmResetButton');
-            resetButton.href = `<?php echo getBaseUrl(); ?>users.php?action=reset_password&id=${userId}`;
-            const resetModal = new bootstrap.Modal(document.getElementById('resetConfirmModal'));
-            resetModal.show();
-        }
     </script>
 </body>
 </html>
