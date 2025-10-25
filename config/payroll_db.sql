@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-10-2025 a las 16:23:37
+-- Tiempo de generación: 25-10-2025 a las 07:43:46
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -36,15 +36,16 @@ CREATE TABLE `employees` (
   `salario_base_mensual_usd` decimal(10,2) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `photo_path` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `employees`
 --
 
-INSERT INTO `employees` (`id`, `cedula`, `full_name`, `fecha_ingreso`, `cargo`, `salario_base_mensual_usd`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, '30236536', 'Alex', '2024-01-24', 'administrador', 200.00, 1, '2025-06-24 14:28:40', '2025-06-24 14:28:40');
+INSERT INTO `employees` (`id`, `cedula`, `full_name`, `fecha_ingreso`, `cargo`, `salario_base_mensual_usd`, `is_active`, `created_at`, `updated_at`, `photo_path`) VALUES
+(1, '30236536', 'Alex', '2024-01-24', 'administrador', 200.00, 1, '2025-06-24 14:28:40', '2025-10-25 01:09:52', 'uploads/employees/employee_68fc23607beb97.00552707.png');
 
 -- --------------------------------------------------------
 
@@ -79,7 +80,22 @@ INSERT INTO `employee_payroll_details` (`id`, `employee_id`, `payroll_period_id`
 (7, 1, 2, 5, 4.00, 432.00, NULL, NULL, '2025-07-07 22:54:24', '2025-07-07 22:54:24'),
 (8, 1, 2, 6, 1.00, 108.00, NULL, NULL, '2025-07-07 22:54:24', '2025-07-07 22:54:24'),
 (9, 1, 2, 7, 1.00, 108.00, NULL, NULL, '2025-07-07 22:54:24', '2025-07-07 22:54:24'),
-(10, 1, 2, 14, 20.00, 2160.00, 15.0, NULL, '2025-07-07 22:54:24', '2025-07-07 22:54:24');
+(10, 1, 2, 14, 20.00, 2160.00, 15.0, NULL, '2025-07-07 22:54:24', '2025-07-07 22:54:24'),
+(11, 1, 3, 1, 100.00, 20000.00, NULL, NULL, '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(12, 1, 3, 5, 4.00, 800.00, NULL, NULL, '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(13, 1, 3, 6, 1.00, 200.00, NULL, NULL, '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(14, 1, 3, 7, 1.00, 200.00, NULL, NULL, '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(15, 1, 3, 14, 20.00, 4000.00, 15.0, NULL, '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(16, 1, 4, 1, 100.00, 20000.00, NULL, NULL, '2025-10-25 01:50:46', '2025-10-25 01:50:46'),
+(17, 1, 4, 5, 4.00, 800.00, NULL, NULL, '2025-10-25 01:50:46', '2025-10-25 01:50:46'),
+(18, 1, 4, 6, 1.00, 200.00, NULL, NULL, '2025-10-25 01:50:46', '2025-10-25 01:50:46'),
+(19, 1, 4, 7, 1.00, 200.00, NULL, NULL, '2025-10-25 01:50:46', '2025-10-25 01:50:46'),
+(20, 1, 4, 14, 20.00, 4000.00, 15.0, NULL, '2025-10-25 01:50:46', '2025-10-25 01:50:46'),
+(21, 1, 6, 1, 100.00, 20000.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
+(22, 1, 6, 5, 4.00, 800.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
+(23, 1, 6, 6, 1.00, 200.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
+(24, 1, 6, 7, 1.00, 200.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
+(25, 1, 6, 14, 20.00, 4000.00, 15.0, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58');
 
 -- --------------------------------------------------------
 
@@ -142,7 +158,10 @@ CREATE TABLE `payroll_periods` (
 
 INSERT INTO `payroll_periods` (`id`, `start_date`, `end_date`, `bcv_rate`, `days_in_period`, `status`, `created_at`, `updated_at`) VALUES
 (1, '2025-07-08', '2025-07-26', 108.0000, 15.0, 'paid', '2025-07-07 21:19:53', '2025-07-07 22:15:54'),
-(2, '2025-07-01', '2025-07-23', 108.0000, 15.0, 'paid', '2025-07-07 22:54:24', '2025-07-07 22:55:38');
+(2, '2025-07-01', '2025-07-23', 108.0000, 15.0, 'paid', '2025-07-07 22:54:24', '2025-07-07 22:55:38'),
+(3, '2025-07-27', '2025-10-31', 200.0000, 15.0, 'calculated', '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(4, '2025-10-01', '2025-10-31', 200.0000, 15.0, 'paid', '2025-10-25 01:50:46', '2025-10-25 01:50:56'),
+(6, '2025-09-17', '2025-10-30', 200.0000, 15.0, 'calculated', '2025-10-25 04:08:58', '2025-10-25 04:08:58');
 
 -- --------------------------------------------------------
 
@@ -250,7 +269,7 @@ ALTER TABLE `employees`
 -- AUTO_INCREMENT de la tabla `employee_payroll_details`
 --
 ALTER TABLE `employee_payroll_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de la tabla `payroll_concepts`
@@ -262,7 +281,7 @@ ALTER TABLE `payroll_concepts`
 -- AUTO_INCREMENT de la tabla `payroll_periods`
 --
 ALTER TABLE `payroll_periods`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `payroll_summaries`

@@ -3,7 +3,7 @@
 // Contiene la barra de navegación. Se incluye dentro del <body> de cada página.
 // Los enlaces CSS y JS se gestionan directamente en cada archivo de página (public/index.php, public/dashboard.php, etc.)
 ?>
-<nav class="navbar navbar-expand-lg navbar-dark">
+<nav class="navbar navbar-expand-lg">
     <div class="container">
         <a class="navbar-brand" href="<?php echo getBaseUrl(); ?>dashboard.php">
             <i class="bi bi-wallet-fill me-2"></i>Sistema de Nómina
@@ -42,6 +42,9 @@
                         <a class="nav-link" href="<?php echo getBaseUrl(); ?>users.php">Usuarios</a>
                     </li>
                 <?php endif; ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?php echo getBaseUrl(); ?>manual_de_usuario.php">Manual de Usuario</a>
+                </li>
             </ul>
             <ul class="navbar-nav ms-auto">
 
@@ -53,9 +56,6 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="<?php echo getBaseUrl(); ?>logout.php"><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a></li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Manual de Usuario</a>
                 </li>
 
                 <li class="nav-item">
