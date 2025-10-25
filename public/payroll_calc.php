@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_update_period->bindParam(':id', $payroll_period_id, PDO::PARAM_INT);
                 $stmt_update_period->execute();
 
-                $message = "Nómina calculada exitosamente para $total_employees_processed empleados. Período: " . htmlspecialchars($start_date) . " al " . htmlspecialchars($end_date) . ". Tasa BCV: " . htmlspecialchars(number_format($bcv_rate, 4)) . ".";
+                $message = "Nómina calculada exitosamente para $total_employees_processed empleados. Período: " . htmlspecialchars($start_date) . " al " . htmlspecialchars($end_date) . ". Tasa BCV: " . htmlspecialchars(number_format($bcv_rate, 2)) . ".";
                 $message_type = 'success';
             }
         } catch (PDOException $e) {
@@ -244,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <td><?php echo htmlspecialchars($period['id']); ?></td>
                                         <td><?php echo htmlspecialchars($period['start_date']); ?></td>
                                         <td><?php echo htmlspecialchars($period['end_date']); ?></td>
-                                        <td><?php echo number_format($period['bcv_rate'], 4); ?></td>
+                                        <td><?php echo number_format($period['bcv_rate'], 2); ?></td>
                                         <td><?php echo htmlspecialchars($period['days_in_period']); ?></td>
                                         <td>
                                             <?php

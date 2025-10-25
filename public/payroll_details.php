@@ -201,7 +201,7 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                             <strong>Período:</strong> <?php echo htmlspecialchars($payroll_period['start_date']); ?> al <?php echo htmlspecialchars($payroll_period['end_date']); ?>
                         </div>
                         <div class="col-md-6">
-                            <strong>Tasa BCV:</strong> <?php echo number_format($payroll_period['bcv_rate'], 4); ?> Bs/$
+                            <strong>Tasa BCV:</strong> <?php echo number_format($payroll_period['bcv_rate'], 2); ?> Bs/$
                         </div>
                     </div>
                     <div class="row">
