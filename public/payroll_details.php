@@ -224,7 +224,7 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                     </div>
                     <div class="mt-3 text-end">
                         <button type="button" class="btn btn-info me-2" onclick="printPayrollDetailsPDF(<?php echo $payroll_period['id']; ?>)">
-                            <i class="bi bi-printer me-1"></i> Imprimir PDF
+                            <i class="bi bi-printer me-1"></i> Descargar PDF
                         </button>
                         <?php if ($payroll_period['status'] === 'calculated'): ?>
                             <form method="POST" action="" style="display:inline;">

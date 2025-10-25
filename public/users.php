@@ -238,9 +238,14 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
         <div class="card mt-5">
             <div class="card-header d-flex justify-content-between align-items-center">
                 Listado de Usuarios
-                <a href="<?php echo getBaseUrl(); ?>users.php?add=1" class="btn btn-primary btn-sm">
-                    <i class="bi bi-person-plus me-1"></i> Añadir Nuevo Usuario
-                </a>
+                <div>
+                    <button type="button" class="btn btn-info btn-sm me-2" onclick="printUsersPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
+                    </button>
+                    <a href="<?php echo getBaseUrl(); ?>users.php?add=1" class="btn btn-primary btn-sm">
+                        <i class="bi bi-person-plus me-1"></i> Añadir Nuevo Usuario
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <?php
@@ -327,6 +332,9 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
             deleteModal.show();
         }
 
+        function printUsersPDF() {
+            window.open('<?php echo getBaseUrl(); ?>generate_users_pdf.php', '_blank');
+        }
     </script>
 </body>
 </html>

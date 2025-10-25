@@ -6,7 +6,8 @@ require_once __DIR__ . '/../config/settings.php'; // Para getDbConnection() y ro
 // Requerir que el usuario esté logueado y tenga rol de 'admin' o 'assistant'
 requireRole([ROLE_ADMIN, ROLE_ASSISTANT]);
 
-require_once __DIR__ . '/../vendor/autoload.php'; // Para TCPDF
+require_once __DIR__ . '/../includes/MyTCPDF.php'; // Para MyTCPDF
+require_once __DIR__ . '/../includes/pdf_styles.php'; // Para estilos de PDF
 
 $start_date_filter = $_POST['start_date_filter'] ?? '';
 $end_date_filter = $_POST['end_date_filter'] ?? '';
@@ -75,7 +76,7 @@ try {
 }
 
 // Crear PDF
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new MyTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // Configurar documento
 $pdf->SetCreator(PDF_CREATOR);
@@ -84,13 +85,16 @@ $pdf->SetTitle('Reporte de Pagos de Nómina');
 $pdf->SetSubject('Análisis de Nóminas Pagadas');
 $pdf->SetKeywords('pagos, nómina, pagos realizados, VALFOR');
 
-// Configurar márgenes
-$pdf->SetMargins(15, 25, 15);
-$pdf->SetHeaderMargin(10);
-$pdf->SetFooterMargin(10);
+// Establecer el título del reporte para el encabezado personalizado
+$pdf->setReportTitle('Reporte de Pagos de Nómina ');
+
+// Configurar márgenes (el encabezado y pie de página personalizados ya manejan sus propios márgenes)
+$pdf->SetMargins(15, 30, 15); // Ajustar el margen superior para dejar espacio al encabezado
+$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 
 // Configurar auto page breaks
-$pdf->SetAutoPageBreak(TRUE, 15);
+$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
 // Configurar fuente
 $pdf->SetFont('helvetica', '', 10);
@@ -98,19 +102,9 @@ $pdf->SetFont('helvetica', '', 10);
 // Añadir página
 $pdf->AddPage();
 
-// Logo en la parte superior izquierda
-$logo_path = __DIR__ . '/assets/img/logo.png';
-if (file_exists($logo_path)) {
-    $pdf->Image($logo_path, 15, 10, 30, 15, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-}
-
-// Título
-$pdf->SetFont('helvetica', 'B', 16);
-$pdf->Cell(0, 10, 'Reporte de Pagos de Nómina - VALFOR S.A.', 0, 1, 'C');
-$pdf->Ln(5);
-
 // Información del período
 $pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColorArray(COLOR_TEXT_DARK);
 if (!empty($start_date_filter) || !empty($end_date_filter)) {
     $period_text = 'Período: ';
     if (!empty($start_date_filter)) {
@@ -124,59 +118,72 @@ if (!empty($start_date_filter) || !empty($end_date_filter)) {
     }
     $pdf->Cell(0, 6, $period_text, 0, 1);
 }
-$pdf->Cell(0, 6, 'Fecha de generación: ' . date('d/m/Y H:i'), 0, 1);
-$pdf->Ln(5);
+$pdf->Cell(0, 10, 'Fecha de generación: ' . date('d/m/Y H:i'), 0, 1);
+$pdf->Ln(8);
 
 // Tabla de pagos
 if (!empty($report_data)) {
-    $pdf->SetFont('helvetica', 'B', 10);
+    $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->SetTextColorArray(COLOR_PRIMARY);
     $pdf->Cell(0, 10, 'Nóminas Pagadas por Período', 0, 1);
-    $pdf->Ln(3);
+    $pdf->Ln(5);
 
-    $pdf->SetFont('helvetica', 'B', 7);
-    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetFillColorArray(COLOR_PRIMARY);
+    $pdf->SetTextColorArray(COLOR_TEXT_LIGHT);
+    $pdf->SetFont('helvetica', 'B', 8);
 
     $header = array('Período', 'Tasa BCV', 'Ingresos ($)', 'Beneficios ($)', 'Deducciones ($)', 'Neto ($)', 'Neto (Bs)');
     $w = array(30, 20, 25, 25, 25, 25, 25);
 
     for($i = 0; $i < count($header); $i++) {
-        $pdf->Cell($w[$i], 7, $header[$i], 1, 0, 'C', 1);
+        $pdf->Cell($w[$i], 8, $header[$i], 1, 0, 'C', 1);
     }
     $pdf->Ln();
 
     // Datos de pagos
-    $pdf->SetFont('helvetica', '', 6);
-    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetFont('helvetica', '', 7);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
 
     $fill = false;
     foreach ($report_data as $row) {
+        $pdf->SetFillColorArray($fill ? COLOR_SECONDARY : array(255, 255, 255));
         $period_text = htmlspecialchars($row['start_date'] . ' al ' . $row['end_date']);
 
-        $pdf->Cell($w[0], 6, $period_text, 'LR', 0, 'L', $fill);
-        $pdf->Cell($w[1], 6, number_format($row['bcv_rate'], 4), 'LR', 0, 'C', $fill);
-        $pdf->Cell($w[2], 6, number_format($row['total_ingresos_usd'], 2), 'LR', 0, 'R', $fill);
-        $pdf->Cell($w[3], 6, number_format($row['total_beneficios_usd'], 2), 'LR', 0, 'R', $fill);
-        $pdf->Cell($w[4], 6, number_format($row['total_deducciones_usd'], 2), 'LR', 0, 'R', $fill);
-        $pdf->Cell($w[5], 6, number_format($row['neto_pagado_usd'], 2), 'LR', 0, 'R', $fill);
-        $pdf->Cell($w[6], 6, number_format($row['neto_pagado_bs'], 2), 'LR', 0, 'R', $fill);
+        $pdf->Cell($w[0], 7, $period_text, 'LBR', 0, 'L', $fill);
+        $pdf->Cell($w[1], 7, number_format($row['bcv_rate'], 4), 'BR', 0, 'C', $fill);
+        $pdf->Cell($w[2], 7, number_format($row['total_ingresos_usd'], 2), 'BR', 0, 'R', $fill);
+        $pdf->Cell($w[3], 7, number_format($row['total_beneficios_usd'], 2), 'BR', 0, 'R', $fill);
+        $pdf->Cell($w[4], 7, number_format($row['total_deducciones_usd'], 2), 'BR', 0, 'R', $fill);
+        $pdf->Cell($w[5], 7, number_format($row['neto_pagado_usd'], 2), 'BR', 0, 'R', $fill);
+        $pdf->Cell($w[6], 7, number_format($row['neto_pagado_bs'], 2), 'BR', 0, 'R', $fill);
         $pdf->Ln();
         $fill = !$fill;
     }
 
-    // Línea final
-    $pdf->Cell(array_sum($w), 0, '', 'T');
     $pdf->Ln(10);
 
     // Resumen total
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 10, 'Resumen Total de Nóminas Pagadas', 0, 1, 'C');
-    $pdf->Ln(3);
+    $pdf->SetFont('helvetica', 'B', 14);
+    $pdf->SetTextColorArray(COLOR_PRIMARY);
+    $pdf->Cell(0, 12, 'Resumen Total de Nóminas Pagadas', 0, 1, 'C');
+    $pdf->Ln(5);
+
+    $pdf->SetFont('helvetica', 'B', 11);
+    $pdf->SetTextColorArray(COLOR_TEXT_LIGHT);
+    $pdf->SetFillColorArray(COLOR_PRIMARY);
+    $pdf->Cell(90, 10, 'Total Neto Pagado:', 'LBR', 0, 'R', 1);
+    $pdf->Cell(45, 10, '$' . number_format($report_summary['total_neto_pagado_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell(45, 10, 'Bs ' . number_format($report_summary['total_neto_pagado_bs'], 2), 'BR', 1, 'R', 1);
 
     $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(0, 6, 'Total Neto Pagado: $' . number_format($report_summary['total_neto_pagado_usd'], 2) . ' (Bs ' . number_format($report_summary['total_neto_pagado_bs'], 2) . ')', 0, 1);
-    $pdf->Cell(0, 6, 'Total Períodos Pagados: ' . $report_summary['total_periodos_pagados'], 0, 1);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
+    $pdf->SetFillColorArray(COLOR_SECONDARY);
+    $pdf->Cell(90, 8, 'Total Períodos Pagados:', 'LBR', 0, 'R', 1);
+    $pdf->Cell(90, 8, $report_summary['total_periodos_pagados'], 'BR', 1, 'R', 1);
+
 } else {
     $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
     $pdf->Cell(0, 10, 'No se encontraron nóminas pagadas en el período especificado.', 0, 1, 'C');
 }
 

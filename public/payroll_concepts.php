@@ -211,8 +211,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="card mt-5">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 Conceptos de Nómina Existentes
+                <button type="button" class="btn btn-info btn-sm" onclick="printPayrollConceptsPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
+                </button>
             </div>
             <div class="card-body">
                 <?php
@@ -295,5 +298,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
     <!-- Scripts personalizados (si los hay) directamente con ruta relativa -->
     <script src="./assets/js/script.js"></script>
+    <script>
+        function printPayrollConceptsPDF() {
+            window.open('<?php echo getBaseUrl(); ?>generate_payroll_concepts_pdf.php', '_blank');
+        }
+    </script>
 </body>
 </html>

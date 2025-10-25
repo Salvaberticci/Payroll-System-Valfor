@@ -33,7 +33,7 @@ $page_title = 'Gestión de Empleados';
                 Listado de Empleados
                 <div>
                     <button type="button" class="btn btn-info btn-sm me-2" onclick="printEmployeesPDF()">
-                        <i class="bi bi-printer me-1"></i> Imprimir PDF
+                        <i class="bi bi-printer me-1"></i> Descargar PDF
                     </button>
                     <a href="<?php echo getBaseUrl(); ?>employees_form.php" class="btn btn-primary btn-sm">
                         <i class="bi bi-person-plus me-1"></i> Añadir Nuevo Empleado

@@ -256,8 +256,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="card mt-5">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 Períodos de Nómina Calculados Recientemente
+                <button type="button" class="btn btn-info btn-sm" onclick="printRecentPayrollPeriodsPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Descagar PDF
+                </button>
             </div>
             <div class="card-body">
                 <?php
@@ -358,6 +361,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             });
         });
+
+        function printRecentPayrollPeriodsPDF() {
+            window.open('<?php echo getBaseUrl(); ?>generate_recent_payroll_periods_pdf.php', '_blank');
+        }
     </script>
 </body>
 </html>

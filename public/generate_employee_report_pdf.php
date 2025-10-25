@@ -6,7 +6,8 @@ require_once __DIR__ . '/../config/settings.php'; // Para getDbConnection() y ro
 // Requerir que el usuario esté logueado y tenga rol de 'admin' o 'assistant'
 requireRole([ROLE_ADMIN, ROLE_ASSISTANT]);
 
-require_once __DIR__ . '/../vendor/autoload.php'; // Para TCPDF
+require_once __DIR__ . '/../includes/MyTCPDF.php'; // Para MyTCPDF
+require_once __DIR__ . '/../includes/pdf_styles.php'; // Para estilos de PDF
 
 $employee_id_selected = $_POST['employee_id'] ?? '';
 $start_date_filter = $_POST['start_date_filter'] ?? '';
@@ -124,7 +125,7 @@ try {
 }
 
 // Crear PDF
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new MyTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // Configurar documento
 $pdf->SetCreator(PDF_CREATOR);
@@ -133,13 +134,16 @@ $pdf->SetTitle('Reporte por Empleado - ' . ($employee_info ? $employee_info['ful
 $pdf->SetSubject('Reporte Individual de Nómina');
 $pdf->SetKeywords('empleado, nómina, reporte, VALFOR');
 
-// Configurar márgenes
-$pdf->SetMargins(15, 25, 15);
-$pdf->SetHeaderMargin(10);
-$pdf->SetFooterMargin(10);
+// Establecer el título del reporte para el encabezado personalizado
+$pdf->setReportTitle('Reporte por Empleado ');
+
+// Configurar márgenes (el encabezado y pie de página personalizados ya manejan sus propios márgenes)
+$pdf->SetMargins(15, 30, 15); // Ajustar el margen superior para dejar espacio al encabezado
+$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 
 // Configurar auto page breaks
-$pdf->SetAutoPageBreak(TRUE, 15);
+$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
 // Configurar fuente
 $pdf->SetFont('helvetica', '', 10);
@@ -147,27 +151,18 @@ $pdf->SetFont('helvetica', '', 10);
 // Añadir página
 $pdf->AddPage();
 
-// Logo en la parte superior izquierda
-$logo_path = __DIR__ . '/assets/img/logo.png';
-if (file_exists($logo_path)) {
-    $pdf->Image($logo_path, 15, 10, 30, 15, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-}
-
-// Título
-$pdf->SetFont('helvetica', 'B', 16);
-$pdf->Cell(0, 10, 'Reporte por Empleado - VALFOR S.A.', 0, 1, 'C');
-$pdf->Ln(5);
-
 // Información del empleado
 if ($employee_info) {
     $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
     $pdf->Cell(0, 8, 'Empleado: ' . htmlspecialchars($employee_info['full_name']), 0, 1);
     $pdf->Cell(0, 8, 'Cédula: ' . htmlspecialchars($employee_info['cedula']), 0, 1);
-    $pdf->Ln(2);
+    $pdf->Ln(4);
 }
 
 // Información del período
 $pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColorArray(COLOR_TEXT_DARK);
 if (!empty($start_date_filter) || !empty($end_date_filter)) {
     $period_text = 'Período: ';
     if (!empty($start_date_filter)) {
@@ -181,99 +176,117 @@ if (!empty($start_date_filter) || !empty($end_date_filter)) {
     }
     $pdf->Cell(0, 6, $period_text, 0, 1);
 }
-$pdf->Cell(0, 6, 'Fecha de generación: ' . date('d/m/Y H:i'), 0, 1);
-$pdf->Ln(5);
+$pdf->Cell(0, 10, 'Fecha de generación: ' . date('d/m/Y H:i'), 0, 1);
+$pdf->Ln(8);
 
 // Procesar cada período
 foreach ($report_data as $period_key => $data) {
     // Título del período
     $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->SetTextColorArray(COLOR_PRIMARY);
     $pdf->Cell(0, 10, 'Período: ' . htmlspecialchars($period_key), 0, 1);
     $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
     $pdf->Cell(0, 6, 'Tasa BCV: ' . number_format($data['bcv_rate'], 4) . ' Bs/$', 0, 1);
-    $pdf->Ln(3);
+    $pdf->Ln(5);
 
     // Tabla de conceptos
-    $pdf->SetFont('helvetica', 'B', 8);
-    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetFillColorArray(COLOR_PRIMARY);
+    $pdf->SetTextColorArray(COLOR_TEXT_LIGHT);
+    $pdf->SetFont('helvetica', 'B', 9);
 
     $header = array('Concepto', 'Tipo', 'Monto ($)', 'Monto (Bs)', 'Días');
     $w = array(60, 30, 25, 25, 15);
 
     for($i = 0; $i < count($header); $i++) {
-        $pdf->Cell($w[$i], 7, $header[$i], 1, 0, 'C', 1);
+        $pdf->Cell($w[$i], 8, $header[$i], 1, 0, 'C', 1); // Borde completo para el encabezado
     }
     $pdf->Ln();
 
     // Datos de conceptos
-    $pdf->SetFont('helvetica', '', 7);
-    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
 
     $fill = false;
     foreach ($data['concepts'] as $concept) {
-        $pdf->Cell($w[0], 6, htmlspecialchars($concept['concept_name']), 'LR', 0, 'L', $fill);
-        $pdf->Cell($w[1], 6, ucfirst(str_replace('_', ' ', $concept['concept_type'])), 'LR', 0, 'C', $fill);
-        $pdf->Cell($w[2], 6, number_format($concept['amount_usd'], 2), 'LR', 0, 'R', $fill);
-        $pdf->Cell($w[3], 6, number_format($concept['amount_bs'], 2), 'LR', 0, 'R', $fill);
-        $pdf->Cell($w[4], 6, (!is_null($concept['days_applied']) ? htmlspecialchars($concept['days_applied']) : 'N/A'), 'LR', 0, 'C', $fill);
+        $pdf->SetFillColorArray($fill ? COLOR_SECONDARY : array(255, 255, 255));
+        $pdf->Cell($w[0], 7, htmlspecialchars($concept['concept_name']), 'LBR', 0, 'L', $fill); // Bordes LBR
+        $pdf->Cell($w[1], 7, ucfirst(str_replace('_', ' ', $concept['concept_type'])), 'BR', 0, 'C', $fill);
+        $pdf->Cell($w[2], 7, number_format($concept['amount_usd'], 2), 'BR', 0, 'R', $fill);
+        $pdf->Cell($w[3], 7, number_format($concept['amount_bs'], 2), 'BR', 0, 'R', $fill);
+        $pdf->Cell($w[4], 7, (!is_null($concept['days_applied']) ? htmlspecialchars($concept['days_applied']) : 'N/A'), 'BR', 0, 'C', $fill);
         $pdf->Ln();
         $fill = !$fill;
     }
 
     // Subtotales del período
-    $pdf->SetFont('helvetica', 'B', 8);
-    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
 
-    $pdf->Cell($w[0] + $w[1], 6, 'Subtotal Ingresos:', 'LR', 0, 'R', 1);
-    $pdf->Cell($w[2], 6, number_format($data['subtotal_ingresos_usd'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[3], 6, number_format($data['subtotal_ingresos_bs'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[4], 6, '', 'LR', 0, 'C', 1);
+    $pdf->SetFillColorArray(COLOR_SECONDARY);
+    $pdf->Cell($w[0] + $w[1], 7, 'Subtotal Ingresos:', 'LBR', 0, 'R', 1);
+    $pdf->Cell($w[2], 7, number_format($data['subtotal_ingresos_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[3], 7, number_format($data['subtotal_ingresos_bs'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[4], 7, '', 'BR', 0, 'C', 1);
     $pdf->Ln();
 
-    $pdf->Cell($w[0] + $w[1], 6, 'Subtotal Beneficios:', 'LR', 0, 'R', 1);
-    $pdf->Cell($w[2], 6, number_format($data['subtotal_beneficios_usd'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[3], 6, number_format($data['subtotal_beneficios_bs'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[4], 6, '', 'LR', 0, 'C', 1);
+    $pdf->Cell($w[0] + $w[1], 7, 'Subtotal Beneficios:', 'LBR', 0, 'R', 1);
+    $pdf->Cell($w[2], 7, number_format($data['subtotal_beneficios_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[3], 7, number_format($data['subtotal_beneficios_bs'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[4], 7, '', 'BR', 0, 'C', 1);
     $pdf->Ln();
 
-    $pdf->Cell($w[0] + $w[1], 6, 'Subtotal Deducciones:', 'LR', 0, 'R', 1);
-    $pdf->Cell($w[2], 6, number_format($data['subtotal_deducciones_usd'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[3], 6, number_format($data['subtotal_deducciones_bs'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[4], 6, '', 'LR', 0, 'C', 1);
+    $pdf->Cell($w[0] + $w[1], 7, 'Subtotal Deducciones:', 'LBR', 0, 'R', 1);
+    $pdf->Cell($w[2], 7, number_format($data['subtotal_deducciones_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[3], 7, number_format($data['subtotal_deducciones_bs'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[4], 7, '', 'BR', 0, 'C', 1);
     $pdf->Ln();
 
-    $pdf->SetFillColor(200, 220, 255);
-    $pdf->Cell($w[0] + $w[1], 6, 'NETO A PAGAR:', 'LR', 0, 'R', 1);
-    $pdf->Cell($w[2], 6, number_format($data['neto_periodo_usd'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[3], 6, number_format($data['neto_periodo_bs'], 2), 'LR', 0, 'R', 1);
-    $pdf->Cell($w[4], 6, '', 'LR', 0, 'C', 1);
+    $pdf->SetFillColorArray(COLOR_PRIMARY); // Color más oscuro para el neto
+    $pdf->SetTextColorArray(COLOR_TEXT_LIGHT);
+    $pdf->Cell($w[0] + $w[1], 7, 'NETO A PAGAR:', 'LBR', 0, 'R', 1);
+    $pdf->Cell($w[2], 7, number_format($data['neto_periodo_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[3], 7, number_format($data['neto_periodo_bs'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell($w[4], 7, '', 'BR', 0, 'C', 1);
     $pdf->Ln();
 
-    // Línea final
-    $pdf->Cell(array_sum($w), 0, '', 'T');
     $pdf->Ln(10);
 
-    // Verificar si necesitamos una nueva página
+    // Verificar si necesitamos una nueva página (la clase MyTCPDF maneja el encabezado automáticamente)
     if ($pdf->GetY() > 250) {
         $pdf->AddPage();
-        // Reagregar logo si hay nueva página
-        if (file_exists($logo_path)) {
-            $pdf->Image($logo_path, 15, 10, 30, 15, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-        }
     }
 }
 
 // Resumen total
 if (!empty($report_data)) {
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 10, 'Resumen Total del Reporte', 0, 1, 'C');
-    $pdf->Ln(3);
+    $pdf->SetFont('helvetica', 'B', 14);
+    $pdf->SetTextColorArray(COLOR_PRIMARY);
+    $pdf->Cell(0, 12, 'Resumen Total del Reporte', 0, 1, 'C');
+    $pdf->Ln(5);
 
-    $pdf->SetFont('helvetica', '', 9);
-    $pdf->Cell(0, 6, 'Total Ingresos Acumulados: $' . number_format($report_summary['total_ingresos_usd'], 2) . ' (Bs ' . number_format($report_summary['total_ingresos_bs'], 2) . ')', 0, 1);
-    $pdf->Cell(0, 6, 'Total Beneficios Acumulados: $' . number_format($report_summary['total_beneficios_usd'], 2) . ' (Bs ' . number_format($report_summary['total_beneficios_bs'], 2) . ')', 0, 1);
-    $pdf->Cell(0, 6, 'Total Deducciones Acumuladas: $' . number_format($report_summary['total_deducciones_usd'], 2) . ' (Bs ' . number_format($report_summary['total_deducciones_bs'], 2) . ')', 0, 1);
-    $pdf->Cell(0, 6, 'NETO TOTAL PAGADO: $' . number_format($report_summary['neto_total_pagado_usd'], 2) . ' (Bs ' . number_format($report_summary['neto_total_pagado_bs'], 2) . ')', 0, 1);
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColorArray(COLOR_TEXT_DARK);
+    $pdf->SetFillColorArray(COLOR_SECONDARY);
+
+    $pdf->Cell(90, 8, 'Total Ingresos Acumulados:', 'LBR', 0, 'R', 1);
+    $pdf->Cell(45, 8, '$' . number_format($report_summary['total_ingresos_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell(45, 8, 'Bs ' . number_format($report_summary['total_ingresos_bs'], 2), 'BR', 1, 'R', 1);
+
+    $pdf->Cell(90, 8, 'Total Beneficios Acumulados:', 'LBR', 0, 'R', 0);
+    $pdf->Cell(45, 8, '$' . number_format($report_summary['total_beneficios_usd'], 2), 'BR', 0, 'R', 0);
+    $pdf->Cell(45, 8, 'Bs ' . number_format($report_summary['total_beneficios_bs'], 2), 'BR', 1, 'R', 0);
+
+    $pdf->Cell(90, 8, 'Total Deducciones Acumuladas:', 'LBR', 0, 'R', 1);
+    $pdf->Cell(45, 8, '$' . number_format($report_summary['total_deducciones_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell(45, 8, 'Bs ' . number_format($report_summary['total_deducciones_bs'], 2), 'BR', 1, 'R', 1);
+
+    $pdf->SetFillColorArray(COLOR_PRIMARY);
+    $pdf->SetTextColorArray(COLOR_TEXT_LIGHT);
+    $pdf->SetFont('helvetica', 'B', 11);
+    $pdf->Cell(90, 10, 'NETO TOTAL PAGADO:', 'LBR', 0, 'R', 1);
+    $pdf->Cell(45, 10, '$' . number_format($report_summary['neto_total_pagado_usd'], 2), 'BR', 0, 'R', 1);
+    $pdf->Cell(45, 10, 'Bs ' . number_format($report_summary['neto_total_pagado_bs'], 2), 'BR', 1, 'R', 1);
 }
 
 // Salida del PDF
