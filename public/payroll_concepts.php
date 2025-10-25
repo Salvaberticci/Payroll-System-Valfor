@@ -247,7 +247,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <tr>
                                         <td><?php echo htmlspecialchars($c['name']); ?></td>
                                         <td><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $c['type']))); ?></td>
-                                        <td><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $c['calculation_type']))); ?></td>
+                                        <td><?php
+                                            $calculation_type_spanish = [
+                                                'fixed_value' => 'Valor Fijo',
+                                                'percentage_of_salary' => 'Porcentaje del Salario',
+                                                'per_day_value' => 'Valor por Día',
+                                                'manual_input' => 'Entrada Manual'
+                                            ];
+                                            echo htmlspecialchars($calculation_type_spanish[$c['calculation_type']] ?? $c['calculation_type']);
+                                        ?></td>
                                         <td><?php echo !is_null($c['default_value']) ? htmlspecialchars(number_format($c['default_value'], 4)) : 'N/A'; ?></td>
                                         <td>
                                             <?php if ($c['applies_to_all']): ?>
