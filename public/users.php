@@ -23,25 +23,20 @@ $user_data = [
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id']) && is_numeric($_GET['id'])) {
     $user_id_to_delete = $_GET['id'];
 
-    // Evitar que un administrador se elimine a sí mismo
-    if ($user_id_to_delete === $_SESSION['user_id']) {
-        $message = 'No puedes eliminar tu propia cuenta de usuario.';
-        $message_type = 'danger';
-    } else {
-        try {
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
-            $stmt->bindParam(':id', $user_id_to_delete, PDO::PARAM_INT);
-            if ($stmt->execute()) {
-                $message = 'Usuario eliminado exitosamente.';
-                $message_type = 'success';
-            } else {
-                $message = 'Error al eliminar el usuario.';
-                $message_type = 'danger';
-            }
-        } catch (PDOException $e) {
-            $message = 'Error de base de datos al eliminar usuario: ' . htmlspecialchars($e->getMessage());
+    // Permitir eliminar cualquier usuario, incluyendo el propio (para instalación oficial)
+    try {
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
+        $stmt->bindParam(':id', $user_id_to_delete, PDO::PARAM_INT);
+        if ($stmt->execute()) {
+            $message = 'Usuario eliminado exitosamente.';
+            $message_type = 'success';
+        } else {
+            $message = 'Error al eliminar el usuario.';
             $message_type = 'danger';
         }
+    } catch (PDOException $e) {
+        $message = 'Error de base de datos al eliminar usuario: ' . htmlspecialchars($e->getMessage());
+        $message_type = 'danger';
     }
     // Redirigir para limpiar los parámetros GET de la URL
     header('Location: ' . getBaseUrl() . 'users.php?message=' . urlencode($message) . '&type=' . urlencode($message_type));
@@ -313,11 +308,9 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                                             <button type="button" class="btn btn-sm btn-warning text-white me-1" title="Resetear Contraseña" onclick="showResetConfirm(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')">
                                                 <i class="bi bi-key"></i>
                                             </button>
-                                            <?php if ($user['id'] !== $_SESSION['user_id']): // Prevenir que el usuario se elimine a sí mismo ?>
                                             <button type="button" class="btn btn-sm btn-danger" title="Eliminar" onclick="showDeleteConfirm(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
-                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
