@@ -9,8 +9,8 @@ define('DB_PASS', '');           // Cambia esto a tu contraseña de base de dato
 
 // Roles de usuario (para facilitar la comparación en el código)
 define('ROLE_ADMIN', 'admin');
-define('ROLE_ASSISTANT', 'assistant');
-define('ROLE_READ_ONLY', 'read_only');
+define('ROLE_ASSISTANT', 'asistente');
+define('ROLE_READ_ONLY', 'solo lectura');
 
 // Iniciar sesión (si aún no está iniciada)
 if (session_status() == PHP_SESSION_NONE) {

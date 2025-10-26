@@ -6,8 +6,10 @@ require_once __DIR__ . '/../config/settings.php'; // Para getDbConnection() y ro
 // Requerir que el usuario esté logueado y tenga rol de 'admin' o 'assistant'
 requireRole([ROLE_ADMIN, ROLE_ASSISTANT]);
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . getBaseUrl() . 'payroll_calc.php');
+    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
     exit();
 }
 
@@ -16,6 +18,7 @@ $start_date = $_POST['start_date'] ?? '';
 $end_date = $_POST['end_date'] ?? '';
 $bcv_rate = str_replace(',', '.', trim($_POST['bcv_rate'] ?? ''));
 $days_in_period = str_replace(',', '.', trim($_POST['days_in_period'] ?? ''));
+$status = $_POST['status'] ?? '';
 
 $message = '';
 $message_type = 'danger';
@@ -43,11 +46,12 @@ if (!$period_id || !is_numeric($period_id)) {
             $pdo->beginTransaction();
 
             // Actualizar el período de nómina
-            $stmt_update = $pdo->prepare("UPDATE payroll_periods SET start_date = :start_date, end_date = :end_date, bcv_rate = :bcv_rate, days_in_period = :days_in_period WHERE id = :id");
+            $stmt_update = $pdo->prepare("UPDATE payroll_periods SET start_date = :start_date, end_date = :end_date, bcv_rate = :bcv_rate, days_in_period = :days_in_period, status = :status WHERE id = :id");
             $stmt_update->bindParam(':start_date', $start_date);
             $stmt_update->bindParam(':end_date', $end_date);
             $stmt_update->bindParam(':bcv_rate', $bcv_rate);
             $stmt_update->bindParam(':days_in_period', $days_in_period);
+            $stmt_update->bindParam(':status', $status);
             $stmt_update->bindParam(':id', $period_id, PDO::PARAM_INT);
             $stmt_update->execute();
 
@@ -139,7 +143,10 @@ if (!$period_id || !is_numeric($period_id)) {
     }
 }
 
-// Redirigir de vuelta a los detalles de la nómina
-header('Location: ' . getBaseUrl() . 'payroll_details.php?period_id=' . $period_id . '&message=' . urlencode($message) . '&type=' . urlencode($message_type));
+// Responder con JSON para AJAX
+echo json_encode([
+    'success' => $message_type === 'success',
+    'message' => $message
+]);
 exit();
 ?>

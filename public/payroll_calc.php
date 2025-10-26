@@ -168,6 +168,408 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Estilos específicos de la página de cálculo de nómina -->
     <link href="./assets/css/payroll_calc.css" rel="stylesheet">
+    <style>
+        /* Estilos para la modal personalizada */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .custom-modal-content {
+            position: relative;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .custom-modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #212529;
+        }
+
+        .custom-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .custom-modal-close:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .custom-modal-body {
+            padding: 1.5rem;
+        }
+
+        .custom-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #212529;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-input:invalid, .form-select:invalid {
+            border-color: #dc3545;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+            border-color: #4e555b;
+        }
+
+        .btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .custom-modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .custom-modal-header, .custom-modal-body, .custom-modal-footer {
+                padding: 1rem;
+            }
+
+            .custom-modal-footer {
+                flex-direction: column;
+            }
+
+            .custom-modal-footer .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* Animación de entrada */
+        .custom-modal-content {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Estilos de error */
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .form-group.error input, .form-group.error select {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        /* Estilos para mensajes de alerta */
+        .alert-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            min-width: 300px;
+            max-width: 500px;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            line-height: 1;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 1rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive para mensajes */
+        @media (max-width: 576px) {
+            .alert-message {
+                left: 10px;
+                right: 10px;
+                min-width: auto;
+            }
+        }
+
+        /* Estilos para modal de eliminación */
+        .delete-modal-content {
+            max-width: 450px;
+        }
+
+        .delete-modal-header {
+            background-color: #f8d7da;
+            border-bottom: 1px solid #f5c6cb;
+        }
+
+        .delete-modal-header .custom-modal-title {
+            color: #721c24;
+        }
+
+        .delete-modal-body {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .delete-warning-icon {
+            margin-bottom: 1rem;
+        }
+
+        .warning-icon {
+            font-size: 3rem;
+            display: block;
+        }
+
+        .delete-message {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #495057;
+        }
+
+        .delete-details {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .delete-details p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .delete-details p:last-child {
+            margin-bottom: 0;
+        }
+
+        .delete-warning {
+            font-size: 0.875rem;
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .delete-modal-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .delete-modal-footer .btn {
+            min-width: 120px;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .delete-icon {
+            margin-right: 0.5rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive para modal de eliminación */
+        @media (max-width: 576px) {
+            .delete-modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .delete-modal-body {
+                padding: 1.5rem 1rem;
+            }
+
+            .delete-modal-footer {
+                flex-direction: column;
+            }
+
+            .delete-modal-footer .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/header.php'; // Incluir la barra de navegación ?>
@@ -345,15 +747,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <a href="<?php echo getBaseUrl(); ?>payroll_details.php?period_id=<?php echo $period['id']; ?>" class="btn btn-sm btn-primary me-1" title="Ver Detalles">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="<?php echo getBaseUrl(); ?>payroll_details.php?period_id=<?php echo $period['id']; ?>&action=edit" class="btn btn-sm btn-warning me-1" title="Editar Nómina">
+                                            <button type="button" class="btn btn-sm btn-warning me-1" title="Editar Nómina" onclick="openEditModal(<?php echo $period['id']; ?>, '<?php echo htmlspecialchars($period['start_date']); ?>', '<?php echo htmlspecialchars($period['end_date']); ?>', '<?php echo htmlspecialchars($period['bcv_rate']); ?>', '<?php echo htmlspecialchars($period['days_in_period']); ?>', '<?php echo htmlspecialchars($period['status']); ?>')">
                                                 <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <?php if ($period['status'] === 'calculado'): ?>
-                                                <button type="button" class="btn btn-sm btn-info me-1" title="Cambiar a Pendiente" onclick="changePayrollStatus(<?php echo $period['id']; ?>, 'pendiente')">
-                                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                            <button type="button" class="btn btn-sm btn-danger" title="Eliminar Nómina" onclick="confirmDeletePeriod(<?php echo $period['id']; ?>)">
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" title="Eliminar Nómina" onclick="openDeleteModal(<?php echo $period['id']; ?>, '<?php echo htmlspecialchars($period['start_date']); ?>', '<?php echo htmlspecialchars($period['end_date']); ?>', '<?php echo htmlspecialchars($display_status); ?>')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -363,6 +760,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </table>
                     </div>
                 <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal personalizado para editar nómina -->
+    <div id="editPayrollModal" class="custom-modal" style="display: none;">
+        <div class="custom-modal-overlay" onclick="closeEditModal()"></div>
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h2 class="custom-modal-title">Editar Nómina</h2>
+                <button type="button" class="custom-modal-close" onclick="closeEditModal()" aria-label="Cerrar modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editPayrollForm" class="custom-modal-body">
+                <input type="hidden" id="edit_period_id" name="period_id">
+
+                <div class="form-group">
+                    <label for="edit_start_date" class="form-label">Fecha de Inicio</label>
+                    <input type="date" class="form-input" id="edit_start_date" name="start_date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_end_date" class="form-label">Fecha de Fin</label>
+                    <input type="date" class="form-input" id="edit_end_date" name="end_date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_bcv_rate" class="form-label">Tasa BCV</label>
+                    <input type="number" step="0.01" class="form-input" id="edit_bcv_rate" name="bcv_rate" placeholder="Ej: 101.08" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_days_in_period" class="form-label">Días en el Período</label>
+                    <input type="number" step="0.5" class="form-input" id="edit_days_in_period" name="days_in_period" placeholder="Ej: 15" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_status" class="form-label">Estado</label>
+                    <select class="form-select" id="edit_status" name="status" required>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="calculado">Calculado</option>
+                        <option value="pagado">Pagado</option>
+                        <option value="cerrado">Cerrado</option>
+                    </select>
+                </div>
+            </form>
+            <div class="custom-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditForm()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar nómina -->
+    <div id="deletePayrollModal" class="custom-modal" style="display: none;">
+        <div class="custom-modal-overlay" onclick="closeDeleteModal()"></div>
+        <div class="custom-modal-content delete-modal-content">
+            <div class="custom-modal-header delete-modal-header">
+                <h2 class="custom-modal-title">Confirmar Eliminación</h2>
+                <button type="button" class="custom-modal-close" onclick="closeDeleteModal()" aria-label="Cerrar modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="custom-modal-body delete-modal-body">
+                <div class="delete-warning-icon">
+                    <span class="warning-icon">⚠️</span>
+                </div>
+                <p class="delete-message">
+                    ¿Está seguro de que desea eliminar este período de nómina?
+                </p>
+                <div class="delete-details">
+                    <p><strong>Período:</strong> <span id="delete_period_range"></span></p>
+                    <p><strong>Estado:</strong> <span id="delete_period_status"></span></p>
+                </div>
+                <p class="delete-warning">
+                    <strong>Advertencia:</strong> Esta acción no se puede deshacer. Se eliminarán todos los detalles de nómina asociados a este período.
+                </p>
+                <input type="hidden" id="delete_period_id">
+            </div>
+            <div class="custom-modal-footer delete-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeletePayroll()">
+                    <span class="delete-icon">🗑️</span> Eliminar Nómina
+                </button>
             </div>
         </div>
     </div>
@@ -399,6 +881,304 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function printRecentPayrollPeriodsPDF() {
             window.open('<?php echo getBaseUrl(); ?>generate_recent_payroll_periods_pdf.php', '_blank');
         }
+
+        // Variables globales para la modal
+        let currentEditingRow = null;
+
+        function openEditModal(periodId, startDate, endDate, bcvRate, daysInPeriod, status) {
+            // Limpiar errores previos
+            clearFormErrors();
+
+            // Rellenar el formulario
+            document.getElementById('edit_period_id').value = periodId;
+            document.getElementById('edit_start_date').value = startDate;
+            document.getElementById('edit_end_date').value = endDate;
+            document.getElementById('edit_bcv_rate').value = bcvRate;
+            document.getElementById('edit_days_in_period').value = daysInPeriod;
+            document.getElementById('edit_status').value = status;
+
+            // Mostrar la modal
+            document.getElementById('editPayrollModal').style.display = 'flex';
+
+            // Enfocar el primer campo
+            document.getElementById('edit_start_date').focus();
+
+            // Prevenir scroll del body
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editPayrollModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            clearFormErrors();
+        }
+
+        function clearFormErrors() {
+            // Remover clases de error
+            const formGroups = document.querySelectorAll('.custom-modal-body .form-group');
+            formGroups.forEach(group => {
+                group.classList.remove('error');
+                const errorMsg = group.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            });
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const formGroup = field.closest('.form-group');
+
+            formGroup.classList.add('error');
+
+            // Remover mensaje de error existente
+            const existingError = formGroup.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // Agregar nuevo mensaje de error
+            const errorElement = document.createElement('span');
+            errorElement.className = 'error-message';
+            errorElement.textContent = message;
+            formGroup.appendChild(errorElement);
+        }
+
+        function validateForm() {
+            let isValid = true;
+            clearFormErrors();
+
+            const startDate = document.getElementById('edit_start_date').value;
+            const endDate = document.getElementById('edit_end_date').value;
+            const bcvRate = parseFloat(document.getElementById('edit_bcv_rate').value);
+            const daysInPeriod = parseFloat(document.getElementById('edit_days_in_period').value);
+            const status = document.getElementById('edit_status').value;
+
+            if (!startDate) {
+                showFieldError('edit_start_date', 'La fecha de inicio es requerida.');
+                isValid = false;
+            }
+
+            if (!endDate) {
+                showFieldError('edit_end_date', 'La fecha de fin es requerida.');
+                isValid = false;
+            }
+
+            if (startDate && endDate && startDate >= endDate) {
+                showFieldError('edit_end_date', 'La fecha de fin debe ser posterior a la fecha de inicio.');
+                isValid = false;
+            }
+
+            if (isNaN(bcvRate) || bcvRate <= 0) {
+                showFieldError('edit_bcv_rate', 'La tasa BCV debe ser un número mayor que cero.');
+                isValid = false;
+            }
+
+            if (isNaN(daysInPeriod) || daysInPeriod <= 0) {
+                showFieldError('edit_days_in_period', 'Los días en el período deben ser un número mayor que cero.');
+                isValid = false;
+            }
+
+            if (!status) {
+                showFieldError('edit_status', 'El estado es requerido.');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function submitEditForm() {
+            if (!validateForm()) {
+                return;
+            }
+
+            // Deshabilitar botón mientras se procesa
+            const submitBtn = document.querySelector('.custom-modal-footer .btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+
+            const formData = new FormData();
+            formData.append('period_id', document.getElementById('edit_period_id').value);
+            formData.append('start_date', document.getElementById('edit_start_date').value);
+            formData.append('end_date', document.getElementById('edit_end_date').value);
+            formData.append('bcv_rate', document.getElementById('edit_bcv_rate').value);
+            formData.append('days_in_period', document.getElementById('edit_days_in_period').value);
+            formData.append('status', document.getElementById('edit_status').value);
+
+
+            // Enviar datos via AJAX
+            fetch('<?php echo getBaseUrl(); ?>update_payroll.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    closeEditModal();
+                    showSuccessMessage(data.message);
+                    // Recargar la página para actualizar la tabla
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showErrorMessage(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage('Error al actualizar la nómina. Por favor, inténtelo de nuevo.');
+            })
+            .finally(() => {
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        }
+
+        function showSuccessMessage(message) {
+            showMessage(message, 'success');
+        }
+
+        function showErrorMessage(message) {
+            showMessage(message, 'error');
+        }
+
+        function showMessage(message, type) {
+            // Remover mensaje existente
+            const existingMessage = document.querySelector('.alert-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            // Crear nuevo mensaje
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `alert-message alert-${type}`;
+            messageDiv.innerHTML = `
+                <div class="alert-content">
+                    <span>${message}</span>
+                    <button type="button" class="alert-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                </div>
+            `;
+
+            // Insertar al inicio del contenedor principal
+            const container = document.querySelector('.container');
+            container.insertBefore(messageDiv, container.firstChild);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (messageDiv.parentElement) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Manejar tecla Escape para cerrar modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('editPayrollModal').style.display === 'flex') {
+                closeEditModal();
+            }
+        });
+
+        // Funciones para modal de eliminación
+        function openDeleteModal(periodId, startDate, endDate, status) {
+            document.getElementById('delete_period_id').value = periodId;
+            document.getElementById('delete_period_range').textContent = startDate + ' al ' + endDate;
+            document.getElementById('delete_period_status').textContent = status;
+
+            document.getElementById('deletePayrollModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // Enfocar el botón de cancelar por defecto
+            document.querySelector('#deletePayrollModal .btn-secondary').focus();
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deletePayrollModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function confirmDeletePayroll() {
+            const periodId = document.getElementById('delete_period_id').value;
+
+            if (!periodId) {
+                showErrorMessage('ID de período no válido.');
+                return;
+            }
+
+            // Deshabilitar botones mientras se procesa
+            const deleteBtn = document.querySelector('#deletePayrollModal .btn-danger');
+            const cancelBtn = document.querySelector('#deletePayrollModal .btn-secondary');
+            const originalDeleteText = deleteBtn.innerHTML;
+            const originalCancelText = cancelBtn.textContent;
+
+            deleteBtn.disabled = true;
+            cancelBtn.disabled = true;
+            deleteBtn.innerHTML = '<span class="loading-spinner"></span> Eliminando...';
+
+            // Enviar solicitud de eliminación
+            fetch('<?php echo getBaseUrl(); ?>delete_payroll.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'period_id=' + encodeURIComponent(periodId)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                closeDeleteModal();
+
+                if (data.success) {
+                    showSuccessMessage(data.message);
+                    // Recargar la página para actualizar la tabla
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showErrorMessage(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                closeDeleteModal();
+                showErrorMessage('Error al eliminar la nómina. Por favor, inténtelo de nuevo.');
+            })
+            .finally(() => {
+                // Rehabilitar botones
+                deleteBtn.disabled = false;
+                cancelBtn.disabled = false;
+                deleteBtn.innerHTML = originalDeleteText;
+            });
+        }
+
+        // Manejar envío del formulario con Enter
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.getElementById('editPayrollModal').style.display === 'flex') {
+                e.preventDefault();
+                submitEditForm();
+            }
+        });
+
+        // Manejar tecla Escape para ambas modales
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('editPayrollModal').style.display === 'flex') {
+                    closeEditModal();
+                } else if (document.getElementById('deletePayrollModal').style.display === 'flex') {
+                    closeDeleteModal();
+                }
+            }
+        });
     </script>
 </body>
 </html>

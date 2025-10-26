@@ -142,7 +142,7 @@ $pdf->AddPage();
 // Información del período
 $pdf->SetFont('helvetica', '', 10);
 $pdf->SetTextColorArray(COLOR_TEXT_DARK);
-$pdf->Cell(0, 6, 'Período: ' . htmlspecialchars($payroll_period['start_date']) . ' al ' . htmlspecialchars($payroll_period['end_date']), 0, 1);
+$pdf->Cell(0, 10, 'Período: ' . htmlspecialchars($payroll_period['start_date']) . ' al ' . htmlspecialchars($payroll_period['end_date']), 0, 1);
 $pdf->Cell(0, 6, 'Tasa BCV: ' . number_format($payroll_period['bcv_rate'], 2) . ' Bs/$', 0, 1);
 $pdf->Cell(0, 6, 'Días en el período: ' . htmlspecialchars($payroll_period['days_in_period']), 0, 1);
 $pdf->Cell(0, 6, 'Estado: ' . htmlspecialchars(ucfirst($payroll_period['status'])), 0, 1);
