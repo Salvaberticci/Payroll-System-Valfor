@@ -274,14 +274,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <span class="badge bg-secondary">No</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
-                                            <a href="<?php echo getBaseUrl(); ?>payroll_concepts.php?id=<?php echo $c['id']; ?>" class="btn btn-sm btn-info text-white me-1" title="Editar">
+                                        <td class="d-flex gap-1">
+                                            <a href="<?php echo getBaseUrl(); ?>payroll_concepts.php?id=<?php echo $c['id']; ?>" class="btn btn-sm btn-info text-white" title="Editar">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
-                                            <!-- Aquí podrías añadir un botón de eliminar, con confirmación JS -->
-                                            <!-- <button type="button" class="btn btn-sm btn-danger" title="Eliminar" onclick="confirmDeleteConcept(<?php echo $c['id']; ?>)">
+                                            <button type="button" class="btn btn-sm btn-danger d-flex align-items-center justify-content-center" title="Eliminar" onclick="showDeleteModal(<?php echo $c['id']; ?>, '<?php echo htmlspecialchars($c['name']); ?>')" style="width: 38px; height: 31px;">
                                                 <i class="bi bi-trash"></i>
-                                            </button> -->
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -293,15 +292,150 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+    <!-- Modal de confirmación de eliminación (solo JavaScript) -->
+    <div id="deleteConceptModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%;">
+            <div style="border-bottom: 1px solid #dee2e6; padding-bottom: 10px; margin-bottom: 15px;">
+                <h5 style="margin: 0; color: #212529;">Confirmar Eliminación</h5>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p id="deleteConceptMessage" style="margin: 0; color: #6c757d;">¿Está seguro de que desea eliminar este concepto? Esta acción no se puede deshacer.</p>
+            </div>
+            <div style="text-align: right;">
+                <button type="button" id="cancelDeleteBtn" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancelar</button>
+                <button type="button" id="confirmDeleteBtn" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <?php include __DIR__ . '/../includes/footer.php'; // Incluir el pie de página ?>
     <!-- Incluir Bootstrap JS (Bundle con Popper) directamente con ruta relativa -->
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
     <!-- Scripts personalizados (si los hay) directamente con ruta relativa -->
     <script src="./assets/js/script.js"></script>
     <script>
+        let conceptToDelete = null;
+
         function printPayrollConceptsPDF() {
             window.open('<?php echo getBaseUrl(); ?>generate_payroll_concepts_pdf.php', '_blank');
         }
+
+        function showDeleteModal(conceptId, conceptName) {
+            conceptToDelete = conceptId;
+            document.getElementById('deleteConceptMessage').textContent =
+                '¿Está seguro de que desea eliminar el concepto "' + conceptName + '"? Esta acción no se puede deshacer.';
+            document.getElementById('deleteConceptModal').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        }
+    
+        function hideDeleteModal() {
+            document.getElementById('deleteConceptModal').style.display = 'none';
+            document.body.style.overflow = ''; // Restaurar scroll del body
+            conceptToDelete = null;
+        }
+    
+        function confirmDelete() {
+            if (conceptToDelete) {
+                deleteConcept(conceptToDelete);
+                // Modal will be hidden after AJAX response
+            }
+        }
+
+        function deleteConcept(conceptId) {
+            console.log('Starting delete for concept ID:', conceptId);
+
+            // Mostrar indicador de carga
+            var deleteBtn = document.getElementById('confirmDeleteBtn');
+            var originalText = deleteBtn.textContent;
+            deleteBtn.textContent = 'Eliminando...';
+            deleteBtn.disabled = true;
+
+            // Crear el objeto XMLHttpRequest
+            var xhr = new XMLHttpRequest();
+
+            // Configurar la solicitud
+            xhr.open('POST', '<?php echo getBaseUrl(); ?>delete_payroll_concept.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            // Manejar la respuesta
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    console.log('AJAX response received, status:', xhr.status);
+                    console.log('Response text:', xhr.responseText);
+
+                    // Restaurar botón
+                    deleteBtn.textContent = originalText;
+                    deleteBtn.disabled = false;
+
+                    // Intentar parsear la respuesta JSON independientemente del status code
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        console.log('Parsed response:', response);
+
+                        if (response.success) {
+                            // Ocultar modal primero
+                            hideDeleteModal();
+                            // Mostrar mensaje de éxito
+                            showAlert(response.message, 'success');
+                            // Recargar la página para actualizar la tabla
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            // Ocultar modal en caso de error de negocio (409, etc.)
+                            hideDeleteModal();
+                            showAlert('Error: ' + response.message, 'danger');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing JSON response:', e);
+                        hideDeleteModal();
+                        showAlert('Error al procesar la respuesta del servidor', 'danger');
+                    }
+                }
+            };
+
+            // Enviar la solicitud
+            xhr.send('concept_id=' + encodeURIComponent(conceptId));
+        }
+
+        function showAlert(message, type) {
+            // Crear elemento de alerta usando solo JavaScript/CSS
+            var alertDiv = document.createElement('div');
+            alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; padding: 15px; border-radius: 5px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);';
+            alertDiv.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = message + '<button type="button" onclick="this.parentNode.remove()" style="float: right; background: none; border: none; color: white; font-size: 20px; cursor: pointer; margin-left: 10px;">&times;</button>';
+    
+            // Agregar al body
+            document.body.appendChild(alertDiv);
+    
+            // Auto-remover después de 5 segundos
+            setTimeout(function() {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Inicializar eventos cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+            document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
+    
+            // Cerrar modal al hacer clic fuera de él
+            document.getElementById('deleteConceptModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideDeleteModal();
+                }
+            });
+    
+            // Cerrar modal con tecla Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('deleteConceptModal').style.display === 'block') {
+                    hideDeleteModal();
+                }
+            });
+        });
     </script>
 </body>
 </html>
