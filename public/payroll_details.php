@@ -36,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt_check->execute();
             $current_status = $stmt_check->fetchColumn();
 
-            if ($current_status === 'calculated') {
-                $stmt_update = $pdo->prepare("UPDATE payroll_periods SET status = 'paid' WHERE id = :id");
+            if ($current_status === 'calculado') {
+                $stmt_update = $pdo->prepare("UPDATE payroll_periods SET status = 'pagado' WHERE id = :id");
                 $stmt_update->bindParam(':id', $period_id_to_pay, PDO::PARAM_INT);
                 if ($stmt_update->execute()) {
                     $message = 'Nómina marcada como PAGADA exitosamente.';
@@ -213,10 +213,10 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                             <?php
                             $badge_class = 'bg-secondary';
                             switch ($payroll_period['status']) {
-                                case 'pending': $badge_class = 'bg-warning text-dark'; break;
-                                case 'calculated': $badge_class = 'bg-info'; break;
-                                case 'paid': $badge_class = 'bg-success'; break;
-                                case 'closed': $badge_class = 'bg-dark'; break;
+                                case 'pendiente': $badge_class = 'bg-warning text-dark'; break;
+                                case 'calculado': $badge_class = 'bg-info'; break;
+                                case 'pagado': $badge_class = 'bg-success'; break;
+                                case 'cerrado': $badge_class = 'bg-dark'; break;
                             }
                             ?>
                             <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars(ucfirst($payroll_period['status'])); ?></span>
@@ -226,7 +226,7 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                         <button type="button" class="btn btn-info me-2" onclick="printPayrollDetailsPDF(<?php echo $payroll_period['id']; ?>)">
                             <i class="bi bi-printer me-1"></i> Descargar PDF
                         </button>
-                        <?php if ($payroll_period['status'] === 'calculated'): ?>
+                        <?php if ($payroll_period['status'] === 'calculado'): ?>
                             <form method="POST" action="" style="display:inline;">
                                 <input type="hidden" name="action" value="mark_as_paid">
                                 <input type="hidden" name="period_id_to_pay" value="<?php echo htmlspecialchars($payroll_period['id']); ?>">

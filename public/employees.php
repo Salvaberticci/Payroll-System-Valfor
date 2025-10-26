@@ -7,6 +7,14 @@ require_once __DIR__ . '/../config/settings.php'; // Para getDbConnection() y ro
 requireRole([ROLE_ADMIN, ROLE_ASSISTANT]);
 
 $page_title = 'Gestión de Empleados';
+
+// Manejar mensajes de la URL
+$message = '';
+$message_type = '';
+if (isset($_GET['message'])) {
+    $message = htmlspecialchars($_GET['message']);
+    $message_type = isset($_GET['type']) ? $_GET['type'] : 'info';
+}
 ?>
 
 <!DOCTYPE html>
@@ -27,6 +35,13 @@ $page_title = 'Gestión de Empleados';
 
     <div class="container mt-4">
         <h1 class="mb-4">Gestión de Empleados</h1>
+
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
+                <?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
 
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -127,8 +142,16 @@ $page_title = 'Gestión de Empleados';
         function confirmDelete(employeeId, employeeName) {
             employeeIdToDelete = employeeId;
             document.getElementById('employeeName').textContent = employeeName;
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
+
+            // Usar vanilla JavaScript para mostrar el modal
+            const modalElement = document.getElementById('deleteModal');
+            if (modalElement) {
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                document.body.classList.add('modal-open');
+
+                
+            }
         }
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', function() {

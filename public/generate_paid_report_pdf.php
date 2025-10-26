@@ -41,7 +41,7 @@ try {
         JOIN
             payroll_concepts pc ON epd.concept_id = pc.id
         WHERE
-            pp.status = 'paid'
+            pp.status = 'pagado'
     ";
     $params = [];
 

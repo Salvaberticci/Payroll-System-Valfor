@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
             JOIN
                 payroll_concepts pc ON epd.concept_id = pc.id
             WHERE
-                pp.status = 'paid'
+                pp.status = 'pagado'
         ";
         $params = [];
 

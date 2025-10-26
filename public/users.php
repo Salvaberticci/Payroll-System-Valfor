@@ -282,9 +282,11 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
                                             <a href="<?php echo getBaseUrl(); ?>users.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info text-white me-1" title="Editar">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-danger" title="Eliminar" onclick="showDeleteConfirm(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                            <?php if ($user['id'] !== $_SESSION['user_id']): // No permitir eliminar al propio usuario ?>
+                                                <button type="button" class="btn btn-sm btn-danger" title="Eliminar" onclick="showDeleteConfirm(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -302,6 +304,12 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
     <!-- Scripts personalizados (si los hay) directamente con ruta relativa -->
     <script src="./assets/js/script.js"></script>
+    <!-- Script específico para la página de usuarios -->
+    <script src="./assets/js/users.js"></script>
+    <script>
+        // Verificar que las funciones estén disponibles
+        console.log('Checking functions:', typeof showDeleteConfirm, typeof printUsersPDF);
+    </script>
 
     <!-- Modal de Confirmación de Eliminación -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
@@ -322,19 +330,5 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
         </div>
     </div>
 
-    <script>
-        // Función para mostrar el modal de confirmación de eliminación
-        function showDeleteConfirm(userId, username) {
-            document.getElementById('usernameToDelete').innerText = username;
-            const deleteButton = document.getElementById('confirmDeleteButton');
-            deleteButton.href = `<?php echo getBaseUrl(); ?>users.php?action=delete&id=${userId}`;
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            deleteModal.show();
-        }
-
-        function printUsersPDF() {
-            window.open('<?php echo getBaseUrl(); ?>generate_users_pdf.php', '_blank');
-        }
-    </script>
 </body>
 </html>

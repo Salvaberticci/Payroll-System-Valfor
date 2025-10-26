@@ -147,7 +147,7 @@ CREATE TABLE `payroll_periods` (
   `end_date` date NOT NULL,
   `bcv_rate` decimal(10,4) NOT NULL,
   `days_in_period` decimal(4,1) NOT NULL,
-  `status` enum('pending','calculated','paid','closed') NOT NULL DEFAULT 'pending',
+  `status` enum('pendiente','calculado','pagado','cerrado') NOT NULL DEFAULT 'pendiente',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -157,11 +157,11 @@ CREATE TABLE `payroll_periods` (
 --
 
 INSERT INTO `payroll_periods` (`id`, `start_date`, `end_date`, `bcv_rate`, `days_in_period`, `status`, `created_at`, `updated_at`) VALUES
-(1, '2025-07-08', '2025-07-26', 108.0000, 15.0, 'paid', '2025-07-07 21:19:53', '2025-07-07 22:15:54'),
-(2, '2025-07-01', '2025-07-23', 108.0000, 15.0, 'paid', '2025-07-07 22:54:24', '2025-07-07 22:55:38'),
-(3, '2025-07-27', '2025-10-31', 200.0000, 15.0, 'calculated', '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
-(4, '2025-10-01', '2025-10-31', 200.0000, 15.0, 'paid', '2025-10-25 01:50:46', '2025-10-25 01:50:56'),
-(6, '2025-09-17', '2025-10-30', 200.0000, 15.0, 'calculated', '2025-10-25 04:08:58', '2025-10-25 04:08:58');
+(1, '2025-07-08', '2025-07-26', 108.0000, 15.0, 'pagado', '2025-07-07 21:19:53', '2025-07-07 22:15:54'),
+(2, '2025-07-01', '2025-07-23', 108.0000, 15.0, 'pagado', '2025-07-07 22:54:24', '2025-07-07 22:55:38'),
+(3, '2025-07-27', '2025-10-31', 200.0000, 15.0, 'calculado', '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
+(4, '2025-10-01', '2025-10-31', 200.0000, 15.0, 'pagado', '2025-10-25 01:50:46', '2025-10-25 01:50:56'),
+(6, '2025-09-17', '2025-10-30', 200.0000, 15.0, 'calculado', '2025-10-25 04:08:58', '2025-10-25 04:08:58');
 
 -- --------------------------------------------------------
 
@@ -294,6 +294,14 @@ ALTER TABLE `payroll_summaries`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- Migrar datos existentes a estados en español
+--
+UPDATE payroll_periods SET status = 'pendiente' WHERE status = 'pending';
+UPDATE payroll_periods SET status = 'calculado' WHERE status = 'calculated';
+UPDATE payroll_periods SET status = 'pagado' WHERE status = 'paid';
+UPDATE payroll_periods SET status = 'cerrado' WHERE status = 'closed';
 
 --
 -- Restricciones para tablas volcadas

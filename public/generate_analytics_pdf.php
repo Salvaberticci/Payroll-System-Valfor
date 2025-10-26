@@ -99,7 +99,7 @@ try {
     $query_periods_count = "
         SELECT COUNT(id) AS num_periods
         FROM payroll_periods
-        WHERE status IN ('calculated', 'paid')
+        WHERE status IN ('calculado', 'pagado')
     ";
     $params_periods_count = [];
     if (!empty($start_date_filter)) {
