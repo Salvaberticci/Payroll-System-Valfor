@@ -2,8 +2,8 @@
 // public/reports_paid.php
 require_once __DIR__ . '/../includes/auth.php'; // Incluir el archivo de autenticación y settings.php
 
-// Requerir que el usuario esté logueado y tenga rol de 'admin' o 'assistant'
-requireRole([ROLE_ADMIN, ROLE_ASSISTANT]);
+// Requerir que el usuario esté logueado y tenga rol de 'admin', 'assistant' o 'solo lectura'
+requireRole([ROLE_ADMIN, ROLE_ASSISTANT, ROLE_READ_ONLY]);
 
 $page_title = 'Reportes de Pagos de Nómina';
 $message = '';
