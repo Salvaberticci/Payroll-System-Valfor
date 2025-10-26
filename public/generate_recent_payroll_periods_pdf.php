@@ -13,7 +13,7 @@ $pdo = getDbConnection();
 
 $payroll_periods = [];
 try {
-    $stmt = $pdo->query("SELECT id, start_date, end_date, bcv_rate, days_in_period, status, created_at FROM payroll_periods WHERE status IN ('calculated', 'paid') ORDER BY created_at DESC LIMIT 10");
+    $stmt = $pdo->query("SELECT id, start_date, end_date, bcv_rate, days_in_period, status, created_at FROM payroll_periods WHERE status IN ('calculado', 'pagado') ORDER BY created_at DESC LIMIT 10");
     $payroll_periods = $stmt->fetchAll();
 } catch (PDOException $e) {
     die('Error al cargar los períodos de nómina: ' . htmlspecialchars($e->getMessage()));

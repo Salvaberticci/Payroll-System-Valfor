@@ -15,7 +15,7 @@ $pdo = getDbConnection();
 // Obtener el último período de nómina calculado para sugerir fechas
 $last_period_end_date = '';
 try {
-    $stmt = $pdo->query("SELECT MAX(end_date) AS last_end_date FROM payroll_periods WHERE status = 'calculated' OR status = 'paid'");
+$stmt = $pdo->query("SELECT MAX(end_date) AS last_end_date FROM payroll_periods WHERE status IN ('calculated', 'pagado', 'calculado', 'paid')");
     $result = $stmt->fetch();
     if ($result && $result['last_end_date']) {
         // Sumar un día a la última fecha de fin para la nueva fecha de inicio
@@ -43,11 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             // 1. Guardar el nuevo período de nómina
-            $stmt = $pdo->prepare("INSERT INTO payroll_periods (start_date, end_date, bcv_rate, days_in_period, status) VALUES (:start_date, :end_date, :bcv_rate, :days_in_period, 'pending')");
+            $stmt = $pdo->prepare("INSERT INTO payroll_periods (start_date, end_date, bcv_rate, days_in_period, status) VALUES (:start_date, :end_date, :bcv_rate, :days_in_period, :status)");
             $stmt->bindParam(':start_date', $start_date);
             $stmt->bindParam(':end_date', $end_date);
             $stmt->bindParam(':bcv_rate', $bcv_rate);
             $stmt->bindParam(':days_in_period', $days_in_period);
+            $initial_status = 'pendiente';
+            $stmt->bindParam(':status', $initial_status);
             $stmt->execute();
             $payroll_period_id = $pdo->lastInsertId();
 
@@ -133,8 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $total_employees_processed++;
                     }
 
-                    // 5. Actualizar el estado del período a 'calculated'
-                    $stmt_update_period = $pdo->prepare("UPDATE payroll_periods SET status = 'calculated' WHERE id = :id");
+                    // 5. Actualizar el estado del período a 'calculado'
+                    $stmt_update_period = $pdo->prepare("UPDATE payroll_periods SET status = 'calculado' WHERE id = :id");
                     $stmt_update_period->bindParam(':id', $payroll_period_id, PDO::PARAM_INT);
                     $stmt_update_period->execute();
 
@@ -235,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <?php foreach ($employees as $employee): ?>
                                         <div class="form-check">
                                             <input class="form-check-input employee-checkbox" type="checkbox" id="employee_<?php echo $employee['id']; ?>" name="selected_employees[]" value="<?php echo $employee['id']; ?>" checked>
-                                            <label class="form-check-label" for="employee_<?php echo $employee['id']; ?>">
+                                            <label class="form-check-label" for="employee_<?php echo htmlspecialchars($employee['id']); ?>">
                                                 <?php echo htmlspecialchars($employee['full_name']); ?> (C.I.: <?php echo htmlspecialchars($employee['cedula']); ?>)
                                             </label>
                                         </div>
@@ -302,26 +304,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <td>
                                             <?php
                                             $badge_class = 'bg-secondary';
-                                            switch ($period['status']) {
-                                                case 'pending': $badge_class = 'bg-warning text-dark'; break;
-                                                case 'calculated': $badge_class = 'bg-info'; break;
-                                                case 'paid': $badge_class = 'bg-success'; break;
-                                                case 'closed': $badge_class = 'bg-dark'; break;
+                                            $display_status = '';
+                                            $status_from_db = $period['status'];
+
+                                            if (empty($status_from_db)) {
+                                                $display_status = 'Pendiente'; // Asumimos que un estado vacío es 'Pendiente'
+                                                $badge_class = 'bg-warning text-dark';
+                                            } else {
+                                                switch ($status_from_db) {
+                                                    case 'pending':
+                                                    case 'pendiente':
+                                                        $badge_class = 'bg-warning text-dark';
+                                                        $display_status = 'Pendiente';
+                                                        break;
+                                                    case 'calculated':
+                                                    case 'calculado':
+                                                        $badge_class = 'bg-info';
+                                                        $display_status = 'Calculado';
+                                                        break;
+                                                    case 'paid':
+                                                    case 'pagado':
+                                                        $badge_class = 'bg-success';
+                                                        $display_status = 'Pagado';
+                                                        break;
+                                                    case 'closed':
+                                                    case 'cerrado':
+                                                        $badge_class = 'bg-dark';
+                                                        $display_status = 'Cerrado';
+                                                        break;
+                                                    default:
+                                                        $display_status = 'Desconocido: ' . htmlspecialchars($status_from_db); // Fallback para depuración
+                                                        break;
+                                                }
                                             }
                                             ?>
-                                            <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars(ucfirst($period['status'])); ?></span>
+                                            <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($display_status); ?></span>
                                         </td>
                                         <td><?php echo htmlspecialchars($period['created_at']); ?></td>
                                         <td>
-                                            <a href="<?php echo getBaseUrl(); ?>payroll_details.php?period_id=<?php echo $period['id']; ?>" class="btn btn-sm btn-primary" title="Ver Detalles">
+                                            <a href="<?php echo getBaseUrl(); ?>payroll_details.php?period_id=<?php echo $period['id']; ?>" class="btn btn-sm btn-primary me-1" title="Ver Detalles">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <!-- Botón para eliminar período (solo si está pendiente o si el rol lo permite) -->
-                                            <?php if ($period['status'] === 'pending' && getUserRole() === ROLE_ADMIN): ?>
-                                            <!-- <button type="button" class="btn btn-sm btn-danger" title="Eliminar Período" onclick="confirmDeletePeriod(<?php echo $period['id']; ?>)">
-                                                <i class="bi bi-trash"></i>
-                                            </button> -->
+                                            <a href="<?php echo getBaseUrl(); ?>payroll_details.php?period_id=<?php echo $period['id']; ?>&action=edit" class="btn btn-sm btn-warning me-1" title="Editar Nómina">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <?php if ($period['status'] === 'calculado'): ?>
+                                                <button type="button" class="btn btn-sm btn-info me-1" title="Cambiar a Pendiente" onclick="changePayrollStatus(<?php echo $period['id']; ?>, 'pendiente')">
+                                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                                </button>
                                             <?php endif; ?>
+                                            <button type="button" class="btn btn-sm btn-danger" title="Eliminar Nómina" onclick="confirmDeletePeriod(<?php echo $period['id']; ?>)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
