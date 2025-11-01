@@ -38,3 +38,36 @@ function getDbConnection() {
     }
     return $pdo;
 }
+
+// Función para obtener la tasa BCV desde la API
+function getBcvRateFromApi() {
+    $apiUrl = "https://ve.dolarapi.com/v1/dolares/oficial";
+    $ch = curl_init($apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout de 10 segundos
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Para desarrollo, deshabilitar verificación SSL si es necesario
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false || $httpCode !== 200) {
+        // Error de conexión o respuesta no válida
+        error_log("Error al obtener tasa BCV desde API: " . ($error ?: "HTTP Code: $httpCode"));
+        return false;
+    }
+
+    $data = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log("Error al decodificar JSON de API BCV: " . json_last_error_msg());
+        return false;
+    }
+
+    if (!isset($data['promedio']) || !is_numeric($data['promedio'])) {
+        error_log("Respuesta de API BCV no contiene 'promedio' válido");
+        return false;
+    }
+
+    return (float) $data['promedio'];
+}

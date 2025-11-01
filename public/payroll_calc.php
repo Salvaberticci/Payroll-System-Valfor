@@ -25,17 +25,22 @@ $stmt = $pdo->query("SELECT MAX(end_date) AS last_end_date FROM payroll_periods 
     // Manejar el error silenciosamente o loguearlo
 }
 
+// Obtener tasa BCV desde la API al cargar la página
+$current_bcv_rate = getBcvRateFromApi();
+
 // Lógica para procesar el formulario cuando se envía (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $start_date = $_POST['start_date'] ?? '';
     $end_date = $_POST['end_date'] ?? '';
-    $bcv_rate = str_replace(',', '.', trim($_POST['bcv_rate'] ?? ''));
     $days_in_period = str_replace(',', '.', trim($_POST['days_in_period'] ?? ''));
     $selected_employees = $_POST['selected_employees'] ?? [];
 
+    // Usar la tasa BCV obtenida de la API
+    $bcv_rate = $current_bcv_rate;
+
     // Validaciones
-    if (empty($start_date) || empty($end_date) || !is_numeric($bcv_rate) || $bcv_rate <= 0 || !is_numeric($days_in_period) || $days_in_period <= 0) {
-        $message = 'Por favor, complete todos los campos y asegúrese de que la Tasa BCV y los Días en el Período sean números válidos y mayores que cero.';
+    if (empty($start_date) || empty($end_date) || $bcv_rate === false || $bcv_rate <= 0 || !is_numeric($days_in_period) || $days_in_period <= 0) {
+        $message = 'Por favor, complete todos los campos requeridos. Error al obtener la tasa BCV desde la API.';
         $message_type = 'danger';
     } elseif ($start_date >= $end_date) {
         $message = 'La fecha de inicio debe ser anterior a la fecha de fin.';
@@ -140,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_update_period->bindParam(':id', $payroll_period_id, PDO::PARAM_INT);
                     $stmt_update_period->execute();
 
-                    $message = "Nómina calculada exitosamente para $total_employees_processed empleados. Período: " . htmlspecialchars($start_date) . " al " . htmlspecialchars($end_date) . ". Tasa BCV: " . htmlspecialchars(number_format($bcv_rate, 2)) . ".";
+                    $message = "Nómina calculada exitosamente para $total_employees_processed empleados. Período: " . htmlspecialchars($start_date) . " al " . htmlspecialchars($end_date) . ". Tasa BCV: " . htmlspecialchars(number_format($bcv_rate, 2)) . " (obtenida de API).";
                     $message_type = 'success';
                 }
             }
@@ -602,8 +607,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="bcv_rate" class="form-label">Tasa BCV</label>
-                            <input type="number" step="0.01" class="form-control" id="bcv_rate" name="bcv_rate" placeholder="Ej: 101.08" required>
+                            <label class="form-label">Tasa BCV (Bs/USD)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="bcv_rate_display" value="<?php echo $current_bcv_rate !== false ? number_format($current_bcv_rate, 4) : 'Error al obtener tasa'; ?>" readonly>
+                                <span class="input-group-text">
+                                    <i class="bi bi-api" title="Obtenido automáticamente desde API"></i>
+                                </span>
+                            </div>
+                            <small class="form-text text-muted">Tasa obtenida automáticamente desde la API del BCV</small>
                         </div>
                         <div class="col-md-6">
                             <label for="days_in_period" class="form-label">Días en el Período</label>
@@ -788,8 +799,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="edit_bcv_rate" class="form-label">Tasa BCV</label>
-                    <input type="number" step="0.01" class="form-input" id="edit_bcv_rate" name="bcv_rate" placeholder="Ej: 101.08" required>
+                    <label class="form-label">Tasa BCV (Bs/USD)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-input" id="edit_bcv_rate_display" value="<?php echo $current_bcv_rate !== false ? number_format($current_bcv_rate, 4) : 'Error al obtener tasa'; ?>" readonly>
+                        <span class="input-group-text">
+                            <i class="bi bi-api" title="Obtenido automáticamente desde API"></i>
+                        </span>
+                    </div>
+                    <small class="form-text text-muted">Tasa obtenida automáticamente desde la API del BCV</small>
                 </div>
 
                 <div class="form-group">
@@ -893,7 +910,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('edit_period_id').value = periodId;
             document.getElementById('edit_start_date').value = startDate;
             document.getElementById('edit_end_date').value = endDate;
-            document.getElementById('edit_bcv_rate').value = bcvRate;
+            document.getElementById('edit_bcv_rate_display').value = '<?php echo $current_bcv_rate !== false ? number_format($current_bcv_rate, 4) : 'Error al obtener tasa'; ?>';
             document.getElementById('edit_days_in_period').value = daysInPeriod;
             document.getElementById('edit_status').value = status;
 
@@ -950,7 +967,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             const startDate = document.getElementById('edit_start_date').value;
             const endDate = document.getElementById('edit_end_date').value;
-            const bcvRate = parseFloat(document.getElementById('edit_bcv_rate').value);
             const daysInPeriod = parseFloat(document.getElementById('edit_days_in_period').value);
             const status = document.getElementById('edit_status').value;
 
@@ -969,10 +985,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 isValid = false;
             }
 
-            if (isNaN(bcvRate) || bcvRate <= 0) {
-                showFieldError('edit_bcv_rate', 'La tasa BCV debe ser un número mayor que cero.');
-                isValid = false;
-            }
 
             if (isNaN(daysInPeriod) || daysInPeriod <= 0) {
                 showFieldError('edit_days_in_period', 'Los días en el período deben ser un número mayor que cero.');
@@ -1002,7 +1014,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             formData.append('period_id', document.getElementById('edit_period_id').value);
             formData.append('start_date', document.getElementById('edit_start_date').value);
             formData.append('end_date', document.getElementById('edit_end_date').value);
-            formData.append('bcv_rate', document.getElementById('edit_bcv_rate').value);
             formData.append('days_in_period', document.getElementById('edit_days_in_period').value);
             formData.append('status', document.getElementById('edit_status').value);
 

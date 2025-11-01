@@ -16,8 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $period_id = $_POST['period_id'] ?? null;
 $start_date = $_POST['start_date'] ?? '';
 $end_date = $_POST['end_date'] ?? '';
-$bcv_rate = str_replace(',', '.', trim($_POST['bcv_rate'] ?? ''));
 $days_in_period = str_replace(',', '.', trim($_POST['days_in_period'] ?? ''));
+
+// Obtener tasa BCV desde la API
+$bcv_rate = getBcvRateFromApi();
 $status = $_POST['status'] ?? '';
 
 $message = '';
@@ -25,8 +27,8 @@ $message_type = 'danger';
 
 if (!$period_id || !is_numeric($period_id)) {
     $message = 'ID de período inválido.';
-} elseif (empty($start_date) || empty($end_date) || !is_numeric($bcv_rate) || $bcv_rate <= 0 || !is_numeric($days_in_period) || $days_in_period <= 0) {
-    $message = 'Por favor, complete todos los campos y asegúrese de que la Tasa BCV y los Días en el Período sean números válidos y mayores que cero.';
+} elseif (empty($start_date) || empty($end_date) || $bcv_rate === false || $bcv_rate <= 0 || !is_numeric($days_in_period) || $days_in_period <= 0) {
+    $message = 'Por favor, complete todos los campos requeridos. Error al obtener la tasa BCV desde la API.';
 } elseif ($start_date >= $end_date) {
     $message = 'La fecha de inicio debe ser anterior a la fecha de fin.';
 } else {
