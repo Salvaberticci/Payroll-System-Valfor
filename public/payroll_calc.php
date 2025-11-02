@@ -614,7 +614,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <i class="bi bi-api" title="Obtenido automáticamente desde API"></i>
                                 </span>
                             </div>
-                            <small class="form-text text-muted">Tasa obtenida automáticamente desde la API del BCV</small>
+                            <small class="form-text text-muted">Tasa obtenida automáticamente en tiempo real</small>
                         </div>
                         <div class="col-md-6">
                             <label for="days_in_period" class="form-label">Días en el Período</label>

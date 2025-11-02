@@ -10,6 +10,11 @@ if (isUserLoggedIn()) {
 
 $error_message = '';
 
+// Mostrar mensaje si la sesión expiró
+if (isset($_GET['expired']) && $_GET['expired'] === '1') {
+    $error_message = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';

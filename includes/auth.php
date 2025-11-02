@@ -22,11 +22,21 @@ function getUserRole() {
 
 /**
  * Función para redireccionar a la página de login si el usuario no está autenticado.
+ * Maneja tanto solicitudes normales como AJAX.
  */
 function requireLogin() {
     if (!isUserLoggedIn()) {
-        header('Location: ' . getBaseUrl() . 'login.php');
-        exit();
+        if (isAjaxRequest()) {
+            // Para solicitudes AJAX, devolver error JSON
+            header('Content-Type: application/json');
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Sesión expirada. Por favor, inicie sesión nuevamente.']);
+            exit();
+        } else {
+            // Para solicitudes normales, redireccionar
+            header('Location: ' . getBaseUrl() . 'index.php');
+            exit();
+        }
     }
 }
 
@@ -37,15 +47,31 @@ function requireLogin() {
 function requireRole($allowedRoles) {
     if (!isUserLoggedIn()) {
         requireLogin(); // Primero asegurar que esté logueado
+        return; // No continuar si requireLogin ya manejó la respuesta
     }
 
     $userRole = getUserRole();
     if (!in_array($userRole, $allowedRoles)) {
-        // Podrías redireccionar a una página de "acceso denegado"
-        // o simplemente al dashboard con un mensaje de error.
-        header('Location: ' . getBaseUrl() . 'index.php?error=access_denied');
-        exit();
+        if (isAjaxRequest()) {
+            // Para solicitudes AJAX, devolver error JSON
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'No tiene permisos para realizar esta acción.']);
+            exit();
+        } else {
+            // Para solicitudes normales, redireccionar al dashboard con error
+            header('Location: ' . getBaseUrl() . 'dashboard.php?error=access_denied');
+            exit();
+        }
     }
+}
+
+/**
+ * Función para detectar si la solicitud es AJAX.
+ * @return bool True si es una solicitud AJAX, false de lo contrario.
+ */
+function isAjaxRequest() {
+    return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 }
 
 /**

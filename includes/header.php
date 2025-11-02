@@ -116,5 +116,35 @@
                     }
                 });
             });
+
+            // Verificar sesión periódicamente para manejar expiración
+            function checkSession() {
+                fetch('<?php echo getBaseUrl(); ?>check_session.php', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.authenticated) {
+                        // Sesión expirada, redirigir al login
+                        window.location.href = '<?php echo getBaseUrl(); ?>index.php?expired=1';
+                    }
+                })
+                .catch(error => {
+                    console.log('Error checking session:', error);
+                });
+            }
+
+            // Verificar sesión cada 5 minutos
+            setInterval(checkSession, 5 * 60 * 1000);
+
+            // También verificar cuando la página gana foco (usuario regresa a la pestaña)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    checkSession();
+                }
+            });
         });
     </script>
