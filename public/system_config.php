@@ -90,15 +90,70 @@ function createDatabaseBackup() {
         $backup_content .= "-- Software Version: 1.0.0\n\n";
 
         $backup_content .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
+        $backup_content .= "SET FOREIGN_KEY_CHECKS = 0;\n";
         $backup_content .= "START TRANSACTION;\n";
         $backup_content .= "SET time_zone = \"+00:00\";\n\n";
 
         foreach ($tables as $table) {
-            // Estructura de la tabla
+            // Estructura de la tabla con verificación de existencia
             $backup_content .= "--\n-- Table structure for table `$table`\n--\n\n";
-            $stmt = $pdo->query("SHOW CREATE TABLE `$table`");
-            $create_table = $stmt->fetch(PDO::FETCH_ASSOC);
-            $backup_content .= $create_table['Create Table'] . ";\n\n";
+            $backup_content .= "CREATE TABLE IF NOT EXISTS `$table` (\n";
+
+            // Obtener información de columnas
+            $stmt = $pdo->query("DESCRIBE `$table`");
+            $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $column_defs = [];
+            $primary_keys = [];
+            $unique_keys = [];
+            $indexes = [];
+
+            foreach ($columns as $column) {
+                $col_def = "`{$column['Field']}` {$column['Type']}";
+
+                if ($column['Null'] === 'NO') {
+                    $col_def .= ' NOT NULL';
+                }
+
+                if (!empty($column['Default'])) {
+                    if ($column['Default'] === 'CURRENT_TIMESTAMP') {
+                        $col_def .= ' DEFAULT CURRENT_TIMESTAMP';
+                    } else {
+                        $col_def .= ' DEFAULT ' . $pdo->quote($column['Default']);
+                    }
+                }
+
+                if (!empty($column['Extra'])) {
+                    $col_def .= ' ' . strtoupper($column['Extra']);
+                }
+
+                $column_defs[] = $col_def;
+
+                if ($column['Key'] === 'PRI') {
+                    $primary_keys[] = "`{$column['Field']}`";
+                }
+
+                if ($column['Key'] === 'UNI') {
+                    $unique_keys[] = "`{$column['Field']}`";
+                }
+            }
+
+            // Agregar definiciones de columnas
+            $backup_content .= implode(",\n", $column_defs) . "\n";
+
+            // Agregar claves primarias
+            if (!empty($primary_keys)) {
+                $backup_content .= ",\nPRIMARY KEY (" . implode(", ", $primary_keys) . ")\n";
+            }
+
+            // Agregar claves únicas
+            if (!empty($unique_keys)) {
+                foreach ($unique_keys as $uk) {
+                    $backup_content .= ",\nUNIQUE KEY {$uk} ({$uk})\n";
+                }
+            }
+
+            $backup_content .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n\n";
 
             // Datos de la tabla
             $stmt = $pdo->query("SELECT * FROM `$table`");
@@ -106,7 +161,7 @@ function createDatabaseBackup() {
 
             if (!empty($rows)) {
                 $backup_content .= "--\n-- Dumping data for table `$table`\n--\n\n";
-                $backup_content .= "INSERT INTO `$table` VALUES\n";
+                $backup_content .= "INSERT IGNORE INTO `$table` VALUES\n";
 
                 $values = [];
                 foreach ($rows as $row) {
@@ -126,6 +181,7 @@ function createDatabaseBackup() {
         }
 
         $backup_content .= "COMMIT;\n";
+        $backup_content .= "SET FOREIGN_KEY_CHECKS = 1;\n";
 
         // Crear nombre del archivo
         $filename = 'payroll_backup_' . date('Y-m-d_H-i-s') . '.sql';

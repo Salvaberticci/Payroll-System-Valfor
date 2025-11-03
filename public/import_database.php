@@ -34,6 +34,11 @@ function importDatabase($filePath) {
         $pdo->beginTransaction();
         $transactionStarted = true;
 
+        // Preparar el SQL para ejecución condicional
+        $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $sql);
+        $sql = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $sql);
+        $sql = str_replace('CREATE DATABASE', 'CREATE DATABASE IF NOT EXISTS', $sql);
+
         // Dividir el SQL en instrucciones individuales
         $statements = array_filter(array_map('trim', explode(';', $sql)));
 
@@ -42,6 +47,11 @@ function importDatabase($filePath) {
 
         foreach ($statements as $statement) {
             if (!empty($statement)) {
+                // Saltar comentarios y comandos SET
+                if (preg_match('/^(SET|START TRANSACTION|COMMIT|--|#)/i', $statement)) {
+                    continue;
+                }
+
                 try {
                     $pdo->exec($statement);
                     $executedStatements++;
