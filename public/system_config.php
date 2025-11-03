@@ -323,7 +323,7 @@ $system_info = getSystemInfo();
                 </div>
 
                 <!-- Lista de Respaldos Recientes -->
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-header">
                         <h6 class="card-title mb-0">
                             <i class="bi bi-clock-history me-2"></i>Respaldos Recientes
@@ -355,6 +355,29 @@ $system_info = getSystemInfo();
                             echo '<p class="text-muted mb-0">Directorio de respaldos no encontrado</p>';
                         }
                         ?>
+                    </div>
+                </div>
+
+                <!-- Importar Base de Datos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-upload me-2"></i>Importar Base de Datos
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Importe datos desde un archivo SQL para restaurar o actualizar la base de datos.
+                        </p>
+                        <a href="<?php echo getBaseUrl(); ?>import_database.php" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-file-earmark-arrow-up me-2"></i>Ir a Importar Base de Datos
+                        </a>
+                        <div class="alert alert-warning mt-3">
+                            <small>
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                Esta acción puede sobrescribir datos existentes. Use con precaución.
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
