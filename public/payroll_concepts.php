@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Modal de confirmación de eliminación (solo JavaScript) -->
     <div id="deleteConceptModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%;">
+        <div style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%;">
             <div style="border-bottom: 1px solid #dee2e6; padding-bottom: 10px; margin-bottom: 15px;">
                 <h5 style="margin: 0; color: #212529;">Confirmar Eliminación</h5>
             </div>
