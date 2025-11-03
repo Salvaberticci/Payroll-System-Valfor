@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
                     </button>
                 </div>
                 <div class="card-body">
-                    <h2 class="mb-4">Detalles por Período</h2>
+                    <h2 class="mb-4">Recibo de Pago</h2>
             <?php foreach ($report_data as $period_key => $data): ?>
                 <div class="card mb-4">
                     <div class="card-header">

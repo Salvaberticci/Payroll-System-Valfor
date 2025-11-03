@@ -289,6 +289,13 @@ if (!empty($report_data)) {
     $pdf->Cell(45, 10, 'Bs ' . number_format($report_summary['neto_total_pagado_bs'], 2), 'BR', 1, 'R', 1);
 }
 
+// Espacio para la firma del empleado
+$pdf->Ln(20);
+$pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColorArray(COLOR_TEXT_DARK);
+$pdf->Cell(0, 10, 'Firma del Empleado:', 0, 1);
+$pdf->Cell(100, 0, '', 'B', 1); // Línea para la firma (mitad del largo)
+
 // Salida del PDF
 $filename = 'reporte_empleado_' . ($employee_info ? preg_replace('/[^a-zA-Z0-9]/', '_', $employee_info['full_name']) : 'desconocido') . '_' . date('Y-m-d_H-i-s') . '.pdf';
 $pdf->Output($filename, 'I');

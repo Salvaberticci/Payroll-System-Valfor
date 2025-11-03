@@ -44,9 +44,7 @@ class MyTCPDF extends TCPDF {
     public function Footer() {
         $this->SetY(-15); // Posición a 15 mm del final
         $this->SetFont('helvetica', 'I', 8); // Fuente itálica
-        // Número de página
-        $this->Cell(0, 10, 'Página ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, 0, 'R');
-        // Nombre de la empresa
+        // Nombre de la empresa (sin número de página)
         $this->Cell(0, 10, $this->companyName, 0, 0, 'L');
     }
 }
