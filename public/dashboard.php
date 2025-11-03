@@ -38,7 +38,7 @@ $page_title = 'Dashboard - Sistema de Nómina';
         <hr class="my-4">
 
         <h2 class="mb-4">Opciones Rápidas:</h2>
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-3 g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4">
             <?php $card_count = 0; ?>
             <?php if (getUserRole() === ROLE_ADMIN || getUserRole() === ROLE_ASSISTANT): ?>
                 <div class="col">
@@ -109,9 +109,9 @@ $page_title = 'Dashboard - Sistema de Nómina';
             <?php $card_count++; ?>
             <?php
             // Add invisible cards to fill the row and ensure uniform size
-            $remainder = $card_count % 3;
+            $remainder = $card_count % 2;
             if ($remainder > 0) {
-                $to_add = 3 - $remainder;
+                $to_add = 2 - $remainder;
                 for ($i = 0; $i < $to_add; $i++) {
                     echo '<div class="col"><div class="card dashboard-card invisible"></div></div>';
                 }
