@@ -54,6 +54,10 @@
                         <i class="bi bi-person-circle me-1"></i> <?php echo htmlspecialchars($_SESSION['username'] ?? 'Invitado'); ?> (<?php echo htmlspecialchars(getUserRole()); ?>)
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <?php if (getUserRole() === ROLE_ADMIN): ?>
+                            <li><a class="dropdown-item" href="<?php echo getBaseUrl(); ?>system_config.php"><i class="bi bi-gear me-2"></i> Configuración del Sistema</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                        <?php endif; ?>
                         <li><a class="dropdown-item" href="<?php echo getBaseUrl(); ?>logout.php"><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a></li>
                     </ul>
                 </li>

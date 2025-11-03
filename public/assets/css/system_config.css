@@ -1,0 +1,150 @@
+/* public/assets/css/system_config.css */
+
+/* Override dashboard styles for system config specific elements */
+.system-info-table {
+    font-size: 0.9rem;
+}
+
+.system-info-table td {
+    padding: 0.25rem 0.5rem;
+    border: none;
+}
+
+.system-info-table td:first-child {
+    font-weight: 500;
+    color: #495057;
+    width: 40%;
+}
+
+.system-info-table td:last-child {
+    color: #6c757d;
+}
+
+.disk-usage-bar {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.backup-list-item {
+    border-left: 3px solid #007bff;
+    transition: all 0.2s ease-in-out;
+}
+
+.backup-list-item:hover {
+    background-color: #f8f9fa;
+    border-left-color: #0056b3;
+}
+
+.backup-file-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.backup-file-size {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.alert-system {
+    border-left: 4px solid;
+}
+
+.alert-system.alert-success {
+    border-left-color: #28a745;
+}
+
+.alert-system.alert-danger {
+    border-left-color: #dc3545;
+}
+
+.alert-system.alert-warning {
+    border-left-color: #ffc107;
+}
+
+.alert-system.alert-info {
+    border-left-color: #17a2b8;
+}
+
+.card-header-system {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.card-header-system .card-title {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.btn-system-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-system-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.progress-system {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-system .progress-bar {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    transition: width 0.6s ease;
+}
+
+/* Ensure consistent card styling with dashboard */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.card-header {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    font-weight: 600;
+    padding: 15px 20px;
+    border-bottom: none;
+}
+
+/* Consistent button styling */
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) inset;
+}
+
+@media (max-width: 768px) {
+    .system-info-table td:first-child {
+        width: 50%;
+    }
+
+    .system-info-table {
+        font-size: 0.85rem;
+    }
+}

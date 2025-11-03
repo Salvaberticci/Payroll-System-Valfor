@@ -79,6 +79,15 @@ $page_title = 'Dashboard - Sistema de Nómina';
                     </a>
                 </div>
                 <?php $card_count++; ?>
+                <div class="col">
+                    <a href="<?php echo getBaseUrl(); ?>system_config.php" class="card h-100 text-decoration-none dashboard-card">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <i class="bi bi-gear display-4 text-primary mb-3"></i>
+                            <h5 class="card-title text-primary">Configuración del Sistema</h5>
+                        </div>
+                    </a>
+                </div>
+                <?php $card_count++; ?>
             <?php endif; ?>
             <div class="col">
                 <a href="<?php echo getBaseUrl(); ?>reports_employee.php" class="card h-100 text-decoration-none dashboard-card">
