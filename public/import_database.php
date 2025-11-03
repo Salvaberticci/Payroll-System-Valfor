@@ -7,6 +7,9 @@ requireRole(['admin']);
 
 // Función para validar y procesar la importación de base de datos
 function importDatabase($filePath) {
+    $pdo = null;
+    $transactionStarted = false;
+
     try {
         $pdo = getDbConnection();
 
@@ -29,6 +32,7 @@ function importDatabase($filePath) {
 
         // Iniciar transacción para asegurar integridad
         $pdo->beginTransaction();
+        $transactionStarted = true;
 
         // Dividir el SQL en instrucciones individuales
         $statements = array_filter(array_map('trim', explode(';', $sql)));
@@ -42,8 +46,8 @@ function importDatabase($filePath) {
                     $pdo->exec($statement);
                     $executedStatements++;
                 } catch (Exception $e) {
-                    $errors[] = "Error en la línea " . ($executedStatements + 1) . ": " . $e->getMessage();
-                    // Continuar con las siguientes instrucciones
+                    $errors[] = "Error en la instrucción " . ($executedStatements + 1) . ": " . $e->getMessage();
+                    // Continuar con las siguientes instrucciones para recopilar todos los errores
                 }
             }
         }
@@ -51,13 +55,18 @@ function importDatabase($filePath) {
         // Confirmar la transacción si no hay errores críticos
         if (empty($errors)) {
             $pdo->commit();
+            $transactionStarted = false;
             return [
                 'success' => true,
                 'message' => "Importación completada exitosamente. Se ejecutaron {$executedStatements} instrucciones SQL.",
                 'statements_executed' => $executedStatements
             ];
         } else {
-            $pdo->rollBack();
+            // Hacer rollback solo si hay errores
+            if ($transactionStarted && $pdo->inTransaction()) {
+                $pdo->rollBack();
+                $transactionStarted = false;
+            }
             return [
                 'success' => false,
                 'error' => 'La importación falló debido a errores en las instrucciones SQL',
@@ -67,8 +76,13 @@ function importDatabase($filePath) {
         }
 
     } catch (Exception $e) {
-        if (isset($pdo) && $pdo->inTransaction()) {
-            $pdo->rollBack();
+        // Hacer rollback de la transacción si está activa
+        if ($pdo && $transactionStarted && $pdo->inTransaction()) {
+            try {
+                $pdo->rollBack();
+            } catch (Exception $rollbackException) {
+                // Ignorar errores de rollback para evitar sobrescribir el error original
+            }
         }
         return [
             'success' => false,
