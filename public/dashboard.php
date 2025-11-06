@@ -27,7 +27,26 @@ $page_title = 'Dashboard - Sistema de Nómina';
 
     <div class="container mt-4">
         <h1 class="mb-4">Bienvenido, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Usuario'); ?>!</h1>
-        <p class="lead">Tu rol es: <strong><?php echo htmlspecialchars(getUserRole()); ?></strong></p>
+        <p class="lead">Tu rol es: <strong><?php
+            $userRole = getUserRole();
+            switch ($userRole) {
+                case ROLE_ADMIN:
+                    echo 'Administrador';
+                    break;
+                case ROLE_ASSISTANT:
+                    echo 'Asistente';
+                    break;
+                case ROLE_READ_ONLY:
+                    echo 'Usuario solo lectura';
+                    break;
+                case ROLE_USER:
+                    echo 'Usuario';
+                    break;
+                default:
+                    echo htmlspecialchars($userRole);
+                    break;
+            }
+        ?></strong></p>
 
         <?php if (isset($_GET['error']) && $_GET['error'] === 'access_denied'): ?>
                 <div class="alert alert-warning" role="alert">
