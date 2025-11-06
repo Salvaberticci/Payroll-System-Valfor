@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-10-2025 a las 07:43:46
+-- Tiempo de generación: 06-11-2025 a las 23:33:23
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -95,7 +95,12 @@ INSERT INTO `employee_payroll_details` (`id`, `employee_id`, `payroll_period_id`
 (22, 1, 6, 5, 4.00, 800.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
 (23, 1, 6, 6, 1.00, 200.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
 (24, 1, 6, 7, 1.00, 200.00, NULL, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
-(25, 1, 6, 14, 20.00, 4000.00, 15.0, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58');
+(25, 1, 6, 14, 20.00, 4000.00, 15.0, NULL, '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
+(26, 1, 7, 1, 100.00, 22396.22, NULL, NULL, '2025-11-03 22:15:34', '2025-11-03 22:15:34'),
+(27, 1, 7, 5, 4.00, 895.85, NULL, NULL, '2025-11-03 22:15:34', '2025-11-03 22:15:34'),
+(28, 1, 7, 6, 1.00, 223.96, NULL, NULL, '2025-11-03 22:15:34', '2025-11-03 22:15:34'),
+(29, 1, 7, 7, 1.00, 223.96, NULL, NULL, '2025-11-03 22:15:34', '2025-11-03 22:15:34'),
+(30, 1, 7, 14, 20.00, 4479.24, 15.0, NULL, '2025-11-03 22:15:34', '2025-11-03 22:15:34');
 
 -- --------------------------------------------------------
 
@@ -125,12 +130,11 @@ INSERT INTO `payroll_concepts` (`id`, `name`, `type`, `calculation_type`, `defau
 (3, 'Retroactivos', 'ingreso', 'manual_input', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (4, 'Otros Ingresos', 'ingreso', 'manual_input', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (5, 'SSO', 'deduccion_legal', 'percentage_of_salary', 0.04, 1, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
-(6, 'SPF', 'deduccion_legal', 'percentage_of_salary', 0.01, 1, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
+(6, 'SPF', 'deduccion_legal', 'percentage_of_salary', 0.05, 1, 1, '2025-06-24 13:21:48', '2025-11-03 22:18:23'),
 (7, 'FAOV', 'deduccion_legal', 'percentage_of_salary', 0.01, 1, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (8, 'ISLR', 'deduccion_legal', 'manual_input', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (9, 'Descuento Préstamo', 'deduccion_personal', 'manual_input', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (10, 'Descuento Adelanto', 'deduccion_personal', 'manual_input', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
-(11, 'Descuento Farmacia', 'deduccion_personal', 'manual_input', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (12, 'Descuento Días Faltantes', 'deduccion_personal', 'per_day_value', NULL, 0, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (13, 'Subsidio Alimentación', 'beneficio', 'manual_input', NULL, 1, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48'),
 (14, 'Cesta Ticket', 'beneficio', 'per_day_value', NULL, 1, 1, '2025-06-24 13:21:48', '2025-06-24 13:21:48');
@@ -161,7 +165,8 @@ INSERT INTO `payroll_periods` (`id`, `start_date`, `end_date`, `bcv_rate`, `days
 (2, '2025-07-01', '2025-07-23', 108.0000, 15.0, 'pagado', '2025-07-07 22:54:24', '2025-07-07 22:55:38'),
 (3, '2025-07-27', '2025-10-31', 200.0000, 15.0, 'calculado', '2025-10-25 01:43:26', '2025-10-25 01:43:26'),
 (4, '2025-10-01', '2025-10-31', 200.0000, 15.0, 'pagado', '2025-10-25 01:50:46', '2025-10-25 01:50:56'),
-(6, '2025-09-17', '2025-10-30', 200.0000, 15.0, 'calculado', '2025-10-25 04:08:58', '2025-10-25 04:08:58');
+(6, '2025-09-17', '2025-10-30', 200.0000, 15.0, 'calculado', '2025-10-25 04:08:58', '2025-10-25 04:08:58'),
+(7, '2025-11-01', '2025-11-08', 223.9622, 15.0, 'calculado', '2025-11-03 22:15:34', '2025-11-03 22:15:34');
 
 -- --------------------------------------------------------
 
@@ -194,7 +199,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','assistant','read_only') NOT NULL DEFAULT 'read_only',
+  `role` enum('admin','asistente','solo_lectura') NOT NULL DEFAULT 'solo_lectura',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -205,7 +210,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`, `updated_at`) VALUES
 (1, 'admin', '$2y$10$tKMgVT9wFf/l7mYATBAZ0.lZ/UMqBtte3Lk0fiX9L3zvr67M.FaWy', 'admin', '2025-06-24 13:21:48', '2025-06-24 14:16:30'),
-(2, 'alex', '$2y$10$u9T2nmJ3a3NCRUdj/tkIyu6JdVoi2GuTKSj6QI6LJVwwyjMow7Qqa', 'assistant', '2025-07-07 22:13:31', '2025-07-07 22:13:31');
+(2, 'alex', '$2y$10$u9T2nmJ3a3NCRUdj/tkIyu6JdVoi2GuTKSj6QI6LJVwwyjMow7Qqa', 'asistente', '2025-07-07 22:13:31', '2025-11-06 22:31:42'),
+(3, 'prueba', '$2y$10$dYyuKc.QMo9LsPSSYtROmeeN5zHEgdO5e6jplIYA8uonGK1Cl/CVe', 'solo_lectura', '2025-11-06 22:15:18', '2025-11-06 22:32:21');
 
 --
 -- Índices para tablas volcadas
@@ -269,7 +275,7 @@ ALTER TABLE `employees`
 -- AUTO_INCREMENT de la tabla `employee_payroll_details`
 --
 ALTER TABLE `employee_payroll_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT de la tabla `payroll_concepts`
@@ -281,7 +287,7 @@ ALTER TABLE `payroll_concepts`
 -- AUTO_INCREMENT de la tabla `payroll_periods`
 --
 ALTER TABLE `payroll_periods`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `payroll_summaries`
@@ -293,15 +299,7 @@ ALTER TABLE `payroll_summaries`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- Migrar datos existentes a estados en español
---
-UPDATE payroll_periods SET status = 'pendiente' WHERE status = 'pending';
-UPDATE payroll_periods SET status = 'calculado' WHERE status = 'calculated';
-UPDATE payroll_periods SET status = 'pagado' WHERE status = 'paid';
-UPDATE payroll_periods SET status = 'cerrado' WHERE status = 'closed';
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
